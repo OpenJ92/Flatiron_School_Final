@@ -1,0 +1,79 @@
+Proposal:
+
+  What question/questions are you trying to solve?
+      A) Can Statistical Analysis, and Machine Learning techniques aid in the development
+          and maintenance of competitive online/offline gaming experiences?
+                *) How can we use information about their play habits to adjust the software of our current game?
+                *) Given the space of possible actions within our game, to what strategies are our players
+                    drawn to (lead to 'winning' outcome)? What actions can our company take to expand the validity of other strategies?
+      B) Provided complete game state information for any given player, can one design
+          a 'Matchmaking' system to increase player enjoyment/retention?
+      C) Is there a place for RL / NN frameworks for in game AI? (Theoretical) / (Answer after project)
+
+  What are the outcomes you think you will find (could use mutually exclusive collectively exhaustive for this), and then so what?
+      A) Statistical analysis on Sc2Replays of players from a variety of leagues.
+          What is the distinction between those leagues?
+          What are the predominant strategies taken by individuals from any given league?
+      B) Classification of player league and Matchmaking System
+      C) Construction of the foundations of and RL learner.
+
+  How would someone, or some entity take action upon learning this?
+      A) An analysis of player behavior in a game is actionable by the developer of the game
+      B) Implement Matchmaking System into competitive video-game
+      B) One might abstract these processes to any domain. **
+
+  What version this question would allow me to find an answer in 2-3 days?
+      A) Can Statistical Analysis, and Machine Learning techniques aid in the development
+          and maintenance of competitive online/offline gaming experiences?
+
+  What version of this question would allow me/motivate me to work on this problem even after completing Flatiron School?
+      A) Is there a place for RL / NN frameworks for in game AI? (Theoretical) / (Answer after project)
+
+  What are some data sources that would allow you to answer this?
+      A) https://gggreplays.com/matches/160000
+          Bronze       https://gggreplays.com/matches#?average_league=0&game_type=1v1&page=166 ~1660 total
+          Silver       https://gggreplays.com/matches#?average_league=1&game_type=1v1&page=1361 ~13610 total
+          Gold         https://gggreplays.com/matches#?average_league=2&game_type=1v1&page=2413 ~24130 total
+          Platinum     https://gggreplays.com/matches#?average_league=3&game_type=1v1&page=3427 ~34270 total
+          Diamond      https://gggreplays.com/matches#?average_league=4&game_type=1v1&page=4083 ~40830 total
+          Master       https://gggreplays.com/matches#?average_league=5&game_type=1v1&page=822 ~8220 total
+          Grand-Master https://gggreplays.com/matches#?average_league=6&game_type=1v1&page=10 ~100 total
+      B)  ---Pro / GM  https://lotv.spawningtool.com/
+                      -- Complete
+
+  What is the ideal data you would hope to gather to answer this question?
+      A) Gameplay data -- How does the population play our game?
+
+  Potentially missing data, that could cause omitted variable bias?
+      A) Interpolation?
+
+  What will be the web component of your final project?
+      A) Flask/Dash - Display information per player // per race // per league // etc...
+
+  Will you create a Flask web app? Dash?
+      A) Yes. The dataset is well formed for Object Relational Mapping. -- StepOne
+                Player <<-->> Game
+                State <<---> Game
+                Player <-->> State
+                      Game: (Players, Map)
+                      Player: ()
+
+  How will you use regression and classification?
+      A) Classification -- (What league are you in? / How can we identify fallbacks and indicate to the player on how to improve?)
+                          Matchmaking System via (RF // NN // NearN // etc...)
+      B) Regression -- (In preparation RL learner) -- Construction of inhibitor functions on random agent bot.
+                          Inhibitor System via (time dependent second order Logistic regressions on attack patterns)
+                                               (time dependent nth/log order regression on Economy/Army metrics)
+
+  What are the challenges you foresee with this project?
+      A) *** Time Management -- Make a plan!
+
+  What are your next steps moving forward?
+      A) Construction of RL learner to play Sc2.
+
+Question Set:
+A. What is the main question you would like to answer? Why are you interested in this?
+B. What are your inputs, what labels are you using to train your model?
+C. What do you hope to accomplish by early next week? (Tuesday / Wednesday)
+D. What is the biggest thing that you helped you in your project over the previous two days?
+      What is the biggest challenge you face now?

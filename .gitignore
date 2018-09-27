@@ -1,0 +1,12 @@
+*.csv
+*.joblib
+*.h5
+*.html
+*.SC2Replay
+*.DS_Store
+*.crdownload
+*.NnXoQT
+*.ini
+*.db
+
+ORM/replays.db.bak

@@ -1,0 +1,100 @@
+link, map
+https://gggreplays.com/matches/144777, Catalyst LE
+https://gggreplays.com/matches/136210, Lost and Found LE
+https://gggreplays.com/matches/131743, Acid Plant LE
+https://gggreplays.com/matches/127261, Lost and Found LE
+https://gggreplays.com/matches/123235, Acid Plant LE
+https://gggreplays.com/matches/108548, Catalyst LE
+https://gggreplays.com/matches/108550, Catalyst LE
+https://gggreplays.com/matches/95314, Lost and Found LE
+https://gggreplays.com/matches/95318, Lost and Found LE
+https://gggreplays.com/matches/90829, Lost and Found LE
+https://gggreplays.com/matches/100512, Redshift LE
+https://gggreplays.com/matches/100508, 16-Bit LE
+https://gggreplays.com/matches/100507, Dreamcatcher LE
+https://gggreplays.com/matches/74199, Acid Plant LE
+https://gggreplays.com/matches/72392, Blackpink LE
+https://gggreplays.com/matches/69168, Acid Plant LE
+https://gggreplays.com/matches/69102, Catalyst LE
+https://gggreplays.com/matches/97069, Blackpink LE
+https://gggreplays.com/matches/63953, Catalyst LE
+https://gggreplays.com/matches/59773, Backwater LE
+https://gggreplays.com/matches/59769, Blackpink LE
+https://gggreplays.com/matches/134934, Catalyst LE
+https://gggreplays.com/matches/55309, Blackpink LE
+https://gggreplays.com/matches/55302, Eastwatch LE
+https://gggreplays.com/matches/55297, Catalyst LE
+https://gggreplays.com/matches/55292, Backwater LE
+https://gggreplays.com/matches/40219, Catalyst LE
+https://gggreplays.com/matches/52070, Acid Plant LE
+https://gggreplays.com/matches/35387, Abiogenesis LE
+https://gggreplays.com/matches/30003, Blackpink LE
+https://gggreplays.com/matches/30004, Neon Violet Square LE
+https://gggreplays.com/matches/24214, Catalyst LE
+https://gggreplays.com/matches/24213, Blackpink LE
+https://gggreplays.com/matches/23510, Abyssal Reef LE
+https://gggreplays.com/matches/23511, Abyssal Reef LE
+https://gggreplays.com/matches/23458, Neon Violet Square LE
+https://gggreplays.com/matches/23455, Battle on the Boardwalk LE
+https://gggreplays.com/matches/46051, Ascension to Aiur LE
+https://gggreplays.com/matches/46054, Odyssey LE
+https://gggreplays.com/matches/94752, Catalyst LE
+https://gggreplays.com/matches/18279, Battle on the Boardwalk LE
+https://gggreplays.com/matches/18270, Ascension to Aiur LE
+https://gggreplays.com/matches/18244, Abyssal Reef LE
+https://gggreplays.com/matches/14461, Blackpink LE
+https://gggreplays.com/matches/9237, Abyssal Reef LE
+https://gggreplays.com/matches/9251, Battle on the Boardwalk LE
+https://gggreplays.com/matches/9258, Catalyst LE
+https://gggreplays.com/matches/9249, Battle on the Boardwalk LE
+https://gggreplays.com/matches/6431, Ascension to Aiur LE
+https://gggreplays.com/matches/9241, Ascension to Aiur LE
+https://gggreplays.com/matches/9322, Catalyst LE
+https://gggreplays.com/matches/9255, Blackpink LE
+https://gggreplays.com/matches/9311, Catalyst LE
+https://gggreplays.com/matches/9232, Abyssal Reef LE
+https://gggreplays.com/matches/9276, Neon Violet Square LE
+https://gggreplays.com/matches/9254, Blackpink LE
+https://gggreplays.com/matches/9283, Odyssey LE
+https://gggreplays.com/matches/9233, Abyssal Reef LE
+https://gggreplays.com/matches/9248, Battle on the Boardwalk LE
+https://gggreplays.com/matches/14697, Neon Violet Square LE
+https://gggreplays.com/matches/14696, Catalyst LE
+https://gggreplays.com/matches/9247, Battle on the Boardwalk LE
+https://gggreplays.com/matches/9234, Abyssal Reef LE
+https://gggreplays.com/matches/9279, Odyssey LE
+https://gggreplays.com/matches/9268, Creep or die (LOTV)
+https://gggreplays.com/matches/9264, Creep or die (LOTV)
+https://gggreplays.com/matches/9267, Creep or die (LOTV)
+https://gggreplays.com/matches/9262, Creep or die (LOTV)
+https://gggreplays.com/matches/16862, Blackpink LE
+https://gggreplays.com/matches/9266, Creep or die (LOTV)
+https://gggreplays.com/matches/9261, Creep or die (LOTV)
+https://gggreplays.com/matches/9265, Creep or die (LOTV)
+https://gggreplays.com/matches/9271, Creep or die (LOTV)
+https://gggreplays.com/matches/9246, Battle on the Boardwalk LE
+https://gggreplays.com/matches/9245, Battle on the Boardwalk LE
+https://gggreplays.com/matches/9240, Ascension to Aiur LE
+https://gggreplays.com/matches/9300, Void Training Stage 2
+https://gggreplays.com/matches/9298, Void Training Stage 1
+https://gggreplays.com/matches/9272, Neon Violet Square LE
+https://gggreplays.com/matches/9278, Odyssey LE
+https://gggreplays.com/matches/9273, Neon Violet Square LE
+https://gggreplays.com/matches/9252, Blackpink LE
+https://gggreplays.com/matches/9235, Abyssal Reef LE
+https://gggreplays.com/matches/9236, Ascension to Aiur LE
+https://gggreplays.com/matches/9277, Odyssey LE
+https://gggreplays.com/matches/9280, Odyssey LE
+https://gggreplays.com/matches/9260, Catalyst LE
+https://gggreplays.com/matches/97756, Abyssal Reef LE
+https://gggreplays.com/matches/9286, Odyssey LE
+https://gggreplays.com/matches/97759, Abyssal Reef LE
+https://gggreplays.com/matches/9269, Interloper LE
+https://gggreplays.com/matches/7986, Abyssal Reef LE
+https://gggreplays.com/matches/19440, Odyssey LE
+https://gggreplays.com/matches/45839, Newkirk Precinct TE (Void)
+https://gggreplays.com/matches/38293, Coda LE
+https://gggreplays.com/matches/38298, Iron Fortress LE
+https://gggreplays.com/matches/38300, Cactus Valley LE
+https://gggreplays.com/matches/38301, Terraform LE
+https://gggreplays.com/matches/38302, Coda LE
