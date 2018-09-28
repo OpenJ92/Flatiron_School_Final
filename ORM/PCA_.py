@@ -105,6 +105,29 @@ def pipeline(func = None, parameters = None):
     B = PCA_UBE_opperation(A)
     return B
 
+
+A = filter_by_Game_highest_league(20)
+
+def filter_by_race(race, list_of_games):
+    race_1 = [(game.id, game.players[0].id) for game in list_of_games if game.playerOne_playrace == race]
+    race_2 = [(game.id, game.players[1].id)  for game in list_of_games if game.playerTwo_playrace == race]
+    return race_1 + race_2
+
+def load_PCA(filter_by_race_):
+    return [joblib.load('PCA_Models/' + str(gpid[1]) + '_' + str(gpid[0]) + '.joblib').components_[0] for gpid in filter_by_race_]
+
+def construct_load_PCA(load_PCA_):
+    return pd.DataFrame(load_PCA_)
+
+def plot_PCA_vectors(construct_load_PCA_):
+    pca = PCA(n_components = 4)
+    tr = pca.fit_transform(construct_load_PCA_)
+    explore_r4(tr[:,0], tr[:,1], tr[:,2], tr[:,3])
+    return None
+
+
+filter
+
 # A, A_col = pipeline()
 
 # query all professional replays and carry out kmeans and GaussianMixture on PCA
