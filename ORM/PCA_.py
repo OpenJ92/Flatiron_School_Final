@@ -105,16 +105,31 @@ def pipeline(func = None, parameters = None):
     B = PCA_UBE_opperation(A)
     return B
 
-
-A = filter_by_Game_highest_league(20)
-
 def filter_by_race(race, list_of_games):
-    race_1 = [(game.id, game.players[0].id) for game in list_of_games if game.playerOne_playrace == race]
-    race_2 = [(game.id, game.players[1].id)  for game in list_of_games if game.playerTwo_playrace == race]
+    try:
+        if race == None:
+            race_1 = [(game.id, game.players[0].id) for game in list_of_games]
+            race_2 = [(game.id, game.players[1].id)  for game in list_of_games]
+        else:
+            race_1 = [(game.id, game.players[0].id) for game in list_of_games if game.playerOne_playrace == race]
+            race_2 = [(game.id, game.players[1].id)  for game in list_of_games if game.playerTwo_playrace == race]
+    except:
+        return None
     return race_1 + race_2
 
 def load_PCA(filter_by_race_):
-    return [joblib.load('PCA_Models/' + str(gpid[1]) + '_' + str(gpid[0]) + '.joblib').components_[0] for gpid in filter_by_race_]
+    filter_by_race_ = [id for id in filter_by_race_ if id != None]
+    PCA_list = []
+    for gpid in filter_by_race_:
+        try:
+            PCA_load = joblib.load('PCA_Models_2/' + str(gpid[1]) + '_' + str(gpid[0]) + '.joblib')
+            if PCA_load.explained_variance_ratio_[0] > .60:
+                PCA_list.append(PCA_load.components_[0])
+        except:
+            pass
+    return PCA_list
+    #return [joblib.load('PCA_Models/' + str(gpid[1]) + '_' + str(gpid[0]) + '.joblib').components_[0] for gpid in filter_by_race_ if joblib.load('PCA_Models/' + str(gpid[1]) + '_' + str(gpid[0]) + '.joblib').explained_variance_ratio_[0] > .75]
+
 
 def construct_load_PCA(load_PCA_):
     return pd.DataFrame(load_PCA_)
@@ -126,33 +141,44 @@ def plot_PCA_vectors(construct_load_PCA_):
     return None
 
 
-filter
+#B = plot_PCA_vectors(construct_load_PCA(load_PCA(filter_by_race('Zerg', A))))
 
-# A, A_col = pipeline()
+def plot_correlation_Heatmap():
+    Terran = construct_load_PCA(load_PCA(filter_by_race('Terran', A)))
+    Protoss = construct_load_PCA(load_PCA(filter_by_race('Protoss', A)))
+    Zerg = construct_load_PCA(load_PCA(filter_by_race('Zerg', A)))
 
-# query all professional replays and carry out kmeans and GaussianMixture on PCA
-# vectors. Then ask the question of what exactly the unsupervised ML picked up on.
+    df = pd.concat([Terran, Protoss, Zerg], axis = 0, sort = False)
+    Y = df @ df.T
+    Y = np.absolute(Y)
+    #import pdb; pdb.set_trace()
+    trace = go.Heatmap(z = np.array(Y))
+    fig = go.Figure(data = [trace])
+    offline.plot(fig)
 
-# pca = PCA()
-# li = []
-# #
-# for i in range(0, len(B)):
-#     for j in range(0, len(B[i])):
-#         W = B[i][j][4].components_[0]
-#         li.append(pd.DataFrame(W))
-#
-# li_A = np.array(pd.concat(li, axis = 1)).T
-# E = pca.fit_transform(li_A.T)
-# explore_r4(E[:,0], E[:,1], E[:,2], E[:,3])
-# #Carry out this analysis on each other event class.
-# n_clusters = 10
-# km_ = KMeans(n_clusters = n_clusters, n_init = 20)
-# km_fit = km_.fit(li_A)
-# km_predict = km_.predict(li_A)
+#B, A_col = pipeline()
+#A = query().all()
+#A = filter_by_Game_highest_league(20)
+plot_correlation_Heatmap()
 
-# n_clusters = 10
-# gm_ = GaussianMixture(n_clusters = n_clusters, n_init = 20)
-# gm_fit = gm_.fit(li_A)
-# gm_predict = gm_.predict(li_A)
+def KMeans_(PCA_df ,n_clusters, n_init, name):
+    km_ = KMeans(n_clusters = n_clusters, n_init = n_init)
+    km_.fit(PCA_df)
+    km_predict = km_.predict(PCA_df)
+    joblib.dump(km_, 'KM_Models/' + name + '_' + str(n_clusters) + '.joblib')
+    return pd.concat([PCA_df, pd.DataFrame(km_predict)], axis = 1, sort = False)
+
+def GaussianMixture_(PCA_df, n_components, n_init, name):
+    gm_ = GaussianMixture(n_components = n_components, n_init = n_init)
+    gm_.fit(PCA_df)
+    gm_predict = gm_.predict(PCA_df)
+    joblib.dump(km_, 'GM_Models/' + name + '_' + str(n_components) + '.joblib')
+    return pd.concat([PCA_df,pd.DataFrame(gm_predict)], axis = 1, sort = False)
+
+
+E = KMeans_(construct_load_PCA(load_PCA(filter_by_race('Terran', A))), 50, 5, 'Terran_Professional')
+F = GaussianMixture_(construct_load_PCA(load_PCA(filter_by_race('Terran', A))), 50, 5, 'Terran_Professional')
+#plan for sept_28_18 --
+##### Carry out Kmeans and Gaussian Mixture on PCA Data
 
 print('exit PCA')
