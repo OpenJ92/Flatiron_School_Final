@@ -16,7 +16,7 @@ print('enter routes.py')
 
 def query():
     return db.session.query(Game)
-    
+
 def filter_by_Player_name(player):
     return db.session.query(Player).filter_by(name = player).first()
 
@@ -37,6 +37,9 @@ def filter_by_Game_category(category):
 
 def filter_by_Game_highest_league(highest_league):
     return db.session.query(Game).filter(or_(Game.playerOne_league == highest_league, Game.playerTwo_league == highest_league)).all()
+
+def filter_by_Game_not_highest_league(highest_league):
+    return db.session.query(Game).filter(or_(Game.playerOne_league != highest_league, Game.playerTwo_league != highest_league)).all()
 
 def filter_by_Game_matchup(r):
     return db.session.query(Game).filter(or_(and_(Game.playerOne_playrace == r[0], Game.playerTwo_playrace == r[1]), and_(Game.playerOne_playrace == r[1], Game.playerTwo_playrace == r[0]))).all()

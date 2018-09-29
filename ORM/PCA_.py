@@ -106,6 +106,7 @@ def pipeline(func = None, parameters = None):
     return B
 
 def filter_by_race(race, list_of_games):
+    list_of_games = [game for game in list_of_games if len(game.players) == 2]
     if race == None:
         race_1 = [(game.id, game.players[0].id) for game in list_of_games]
         race_2 = [(game.id, game.players[1].id)  for game in list_of_games]
