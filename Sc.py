@@ -52,12 +52,12 @@ if False: #Get replay files from ST.
     ST_ZvP_DL = ['https://lotv.spawningtool.com' + element['href'] for Beautiful in ST_ZvP_A for element in Beautiful if 'download' in element['href']]
     ST_ZvP_file_to_dir = [webbrowser.open(link) for link in ST_ZvP_DL]
 
-_link_PvP = 'https://lotv.spawningtool.com/replays/?tag=9&tag=17&before_time=&after_time=&after_played_on=&coop=n&query=&patch=130&order_by=&before_played_on=&pro_only=on&p='
-ST_PvP_Requests = [requests.get(_link_PvP + str(link_)) for link_ in range(1, 11)]
-ST_PvP_BeautifulSoup = [BeautifulSoup(request.text) for request in ST_PvP_Requests]
-ST_PvP_A = [Beautiful.find_all('a') for Beautiful in ST_PvP_BeautifulSoup]
-ST_PvP_DL = ['https://lotv.spawningtool.com' + element['href'] for Beautiful in ST_PvP_A for element in Beautiful if 'download' in element['href']]
-ST_PvP_file_to_dir = [webbrowser.open(link) for link in ST_PvP_DL]
+    _link_PvP = 'https://lotv.spawningtool.com/replays/?tag=9&tag=17&before_time=&after_time=&after_played_on=&coop=n&query=&patch=130&order_by=&before_played_on=&pro_only=on&p='
+    ST_PvP_Requests = [requests.get(_link_PvP + str(link_)) for link_ in range(1, 11)]
+    ST_PvP_BeautifulSoup = [BeautifulSoup(request.text) for request in ST_PvP_Requests]
+    ST_PvP_A = [Beautiful.find_all('a') for Beautiful in ST_PvP_BeautifulSoup]
+    ST_PvP_DL = ['https://lotv.spawningtool.com' + element['href'] for Beautiful in ST_PvP_A for element in Beautiful if 'download' in element['href']]
+    ST_PvP_file_to_dir = [webbrowser.open(link) for link in ST_PvP_DL]
 
 if False:
     replays_PvT = []
