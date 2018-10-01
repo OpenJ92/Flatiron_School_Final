@@ -361,7 +361,7 @@ def pipeline(func = [None, PCA_UBE_df, PCA_opperation], parameters =[None, 'UBE'
     if parameters[0] == None:
         games = query().all()
     else:
-        games = func[0](parameters)
+        games = func[0](parameters[0])
     A = [func[1](game) for game in games]
     B = func[2](A, parameters[1])
     return B
@@ -459,11 +459,11 @@ def plot_Unsupervised_Cluster(type_, n_, n_init, n_components, PCA_df, race, nam
 
 
 # A = filter_by_Game_highest_league(20)
-B_0, A_col_0 = pipeline(func = [None, PCA_UBE_df, PCA_opperation], parameters = [None, 'UBE'])
-#B_1, A_col_1 = pipeline(func = [None, PCA_PSE_df, PCA_opperation], parameters = [None, 'PSE'])
-#B_2, A_col_2 = pipeline(func = [None, PCA_TPE_df, PCA_opperation], parameters = [None, 'TPE'])
-#B_3, A_col_3 = pipeline(func = [None, PCA_UDE_df, PCA_opperation], parameters = [None, 'UDE'])
-#B_4, A_col_4 = pipeline(func = [None, PCA_BCE_df, PCA_opperation], parameters = [None, 'BCE'])
+B_0, A_col_0 = pipeline(func = [filter_by_Game_highest_league, PCA_UBE_df, PCA_opperation], parameters = [20, 'UBE'])
+B_1, A_col_1 = pipeline(func = [filter_by_Game_highest_league, PCA_PSE_df, PCA_opperation], parameters = [20, 'PSE'])
+B_2, A_col_2 = pipeline(func = [filter_by_Game_highest_league, PCA_TPE_df, PCA_opperation], parameters = [20, 'TPE'])
+B_3, A_col_3 = pipeline(func = [filter_by_Game_highest_league, PCA_UDE_df, PCA_opperation], parameters = [20, 'UDE'])
+B_4, A_col_4 = pipeline(func = [filter_by_Game_highest_league, PCA_BCE_df, PCA_opperation], parameters = [20, 'BCE'])
 
 # Q = plot_PCA_vectors(construct_load_PCA(load_PCA(filter_by_race('Terran', A), 'TPE')))
 
