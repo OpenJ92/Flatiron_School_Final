@@ -23,6 +23,9 @@ def filter_by_Player_name(player):
 def filter_by_Player_region(region):
     return db.session.query(Player).filter_by(region = region).all()
 
+def filter_Game_by_id(id):
+    return db.session.query(Game).filter_by(id = id).first()
+
 def filter_Game_by_name(name):
     return db.session.query(Game).filter_by(name = name).first()
 

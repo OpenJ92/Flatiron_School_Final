@@ -247,54 +247,7 @@ def PCA_BCE_df(game):
     #expected output -> [[df, player_id, game_id], [df, player_id, game_id]]
     return [df_PlayerOne_o, game_players[0].id, game_id, game.playerOne_playrace], [df_PlayerTwo_o, game_players[1].id, game_id, game.playerTwo_playrace]
 
-#YOU'RE WORKING ON THIS
-# def combine_domain_DataFrame(game, df_func):
-#     df_A_f1 = df_func[1](game)[0][1]
-#     df_A_f0 = df_func[0](game)[0][0]
-#     df_B_f1 = df_func[1](game)[0][1]
-#     df_B_f0 = df_func[0](game)[0][0]
-#
-#     second_max = max([max(df_A['second']), max(df_B['second'])])
-#     second_df = pd.DataFrame(list(range(0, second_max)), columns = ['second'])
-#
-#     df_A_f1_m = pd.merge(df_A_f1, second_df, on = 'second', how = 'right').ffill()
-#     df_A_f0_m = pd.merge(df_A_f0, second_df, on = 'second', how = 'right').ffill()
-#     df_B_f1_m = pd.merge(df_B_f1, second_df, on = 'second', how = 'right').ffill()
-#     df_B_f0_m = pd.merge(df_B_f0, second_df, on = 'second', how = 'right').ffill()
-
-
-def PCA_UBE_opperation(events_PCA):
-    #expected input -> [[df, player_id, game_id], [df, player_id, game_id], [df, player_id, game_id], ..., [df, player_id, game_id]]
-    events_PCA = [game for game in events_PCA if game != None]
-    events_PCA_w_PC = []
-    events_PCA_conglomerate = []
-
-    for game in events_PCA:
-        for player in game:
-            events_PCA_conglomerate.append(player[0])
-
-    events_PCA_conglomerate_df = pd.concat(events_PCA_conglomerate, axis = 0, sort = False).fillna(int(0))
-
-    for game in range(0,len(events_PCA)):
-        for player in range(0,len(events_PCA[game])):
-            events_PCA[game][player].append(events_PCA_conglomerate_df[(events_PCA_conglomerate_df['player_id'] == events_PCA[game][player][1]) & (events_PCA_conglomerate_df['game_id'] == events_PCA[game][player][2])].drop(columns = list(events_PCA_conglomerate_df.columns[:15])))
-            #####Remember to put back 'player_id' and 'game_id'
-
-    for game in range(0,len(events_PCA)):
-        for player in range(0,len(events_PCA[game])):
-            df = events_PCA[game][player][3]
-            mm = MinMaxScaler()
-            df_mm = mm.fit_transform(df)
-            _PCA = PCA()
-            _PCA.fit(df_mm)
-            ## 'player_id'_'game_id'.joblib
-            joblib.dump(_PCA, 'PCA_Models_UBE/' + str(events_PCA[game][player][1]) + '_' + str(events_PCA[game][player][2]) + '.joblib')
-            events_PCA[game][player].append(_PCA)
-
-    #expected output -> [[[df, player_id, game_id, df_A, PCAobject], [df, player_id, game_id, df_A, PCAobject]], [[df, player_id, game_id, df_A, PCAobject], ..., [df, player_id, game_id, df_A, PCAobject]]
-    return events_PCA, events_PCA[0][0][3].columns
-
-def PCA_opperation(events_PCA, event_):
+def PCA_operation(events_PCA, event_):
     #expected input -> [[df, player_id, game_id], [df, player_id, game_id], [df, player_id, game_id], ..., [df, player_id, game_id]]
     events_PCA = [game for game in events_PCA if game != None]
     events_PCA_w_PC = []
@@ -313,7 +266,9 @@ def PCA_opperation(events_PCA, event_):
 
     for game in range(0,len(events_PCA)):
         for player in range(0,len(events_PCA[game])):
-            df = events_PCA[game][player][0]
+            df = events_PCA[game][player][0].drop(columns = ['game_id', 'player_id', 'second'])
+            if df.shape[1] == 0:
+                break
             mm = MinMaxScaler()
             df_mm = mm.fit_transform(df)
             _PCA = PCA()
@@ -325,8 +280,7 @@ def PCA_opperation(events_PCA, event_):
     #expected output -> [[[df, player_id, game_id, df_A, PCAobject], [df, player_id, game_id, df_A, PCAobject]], [[df, player_id, game_id, df_A, PCAobject], ..., [df, player_id, game_id, df_A, PCAobject]]
     return events_PCA, events_PCA[0][0][0].columns
 
-#construct UnitDoneEvent opperation for PCA transformation.
-def PCA_UDE_opperation(events_PCA):
+def TSVD_operation(events_PCA, event_):
     #expected input -> [[df, player_id, game_id], [df, player_id, game_id], [df, player_id, game_id], ..., [df, player_id, game_id]]
     events_PCA = [game for game in events_PCA if game != None]
     events_PCA_w_PC = []
@@ -345,19 +299,32 @@ def PCA_UDE_opperation(events_PCA):
 
     for game in range(0,len(events_PCA)):
         for player in range(0,len(events_PCA[game])):
-            df = events_PCA[game][player][3]
+            df = events_PCA[game][player][0].drop(columns = ['game_id', 'player_id', 'second'])
             mm = MinMaxScaler()
             df_mm = mm.fit_transform(df)
-            _PCA = PCA()
-            _PCA.fit(df_mm)
+            _TruncatedSVD = TruncatedSVD()
+            _TruncatedSVD.fit(df_mm)
             ## 'player_id'_'game_id'.joblib
-            joblib.dump(_PCA, 'PCA_Models_UDE/' + str(events_PCA[game][player][1]) + '_' + str(events_PCA[game][player][2]) + '.joblib')
-            events_PCA[game][player].append(_PCA)
+            joblib.dump(_TruncatedSVD, 'TSVD_Models_'+ event_ +'/' + str(events_PCA[game][player][1]) + '_' + str(events_PCA[game][player][2]) + '.joblib')
+            events_PCA[game][player].append(_TruncatedSVD)
 
     #expected output -> [[[df, player_id, game_id, df_A, PCAobject], [df, player_id, game_id, df_A, PCAobject]], [[df, player_id, game_id, df_A, PCAobject], ..., [df, player_id, game_id, df_A, PCAobject]]
-    return events_PCA, events_PCA[0][0][3].columns
+    return events_PCA, events_PCA[0][0][0].columns
 
-def pipeline(func = [None, PCA_UBE_df, PCA_opperation], parameters =[None, 'UBE']):
+def plot_df_vectors(PCA_df, race):
+    PCA_df = [game for game in PCA_df if game != None]
+    if race == None:
+        PCA_df_ = [df_list[player][0] for df_list in PCA_df for player in range(0,len(df_list))]
+    else:
+        PCA_df_ = [df_list[player][0] for df_list in PCA_df for player in range(0,len(df_list)) if df_list[player][3] == race]
+    PCA_df_o = pd.concat(PCA_df_, sort = False).fillna(0).drop(columns = ['game_id', 'player_id', 'second'])
+    mm = MinMaxScaler()
+    df_mm = mm.fit_transform(PCA_df_o)
+    pca = PCA(n_components = 4)
+    tr = pca.fit_transform(df_mm)
+    explore_r4(tr[:,0], tr[:,1], tr[:,2], tr[:,3])
+
+def pipeline(func = [None, PCA_UBE_df, PCA_operation], parameters =[None, 'UBE']):
     if parameters[0] == None:
         games = query().all()
     else:
@@ -367,23 +334,10 @@ def pipeline(func = [None, PCA_UBE_df, PCA_opperation], parameters =[None, 'UBE'
     return B
 
 
-B_0, A_col_0 = pipeline(func = [filter_by_Game_highest_league, PCA_UBE_df, PCA_opperation], parameters = [20, 'UBE'])
-B_1, A_col_1 = pipeline(func = [filter_by_Game_highest_league, PCA_PSE_df, PCA_opperation], parameters = [20, 'PSE'])
-B_2, A_col_2 = pipeline(func = [filter_by_Game_highest_league, PCA_TPE_df, PCA_opperation], parameters = [20, 'TPE'])
-B_3, A_col_3 = pipeline(func = [filter_by_Game_highest_league, PCA_UDE_df, PCA_opperation], parameters = [20, 'UDE'])
-B_4, A_col_4 = pipeline(func = [filter_by_Game_highest_league, PCA_BCE_df, PCA_opperation], parameters = [20, 'BCE'])
-
-# Q = plot_PCA_vectors(construct_load_PCA(load_PCA(filter_by_race('Terran', A), 'TPE')))
-
-#plot_df_vectors(PCA_df, 'Terran')
-#plot_Unsupervised_Cluster('GaussianMixture', 20, 2, 5, A, None, 'None_Gaussian')
-#plot_correlation_Heatmap(A)
-
-# E = KMeans_(construct_load_PCA(load_PCA(filter_by_race('Terran', A))), 50, 5, 'Terran_Professional')
-# F = GaussianMixture_(construct_load_PCA(load_PCA(filter_by_race('Terran', A))), 50, 5, 'Terran_Professional')
-
-######Next step: Carry out KMeans on PCA
-######           Find distincion between each class
-######           Not sure what to do next. Think about it.
-
+if False:
+    B_0, A_col_0 = pipeline(func = [filter_by_Game_highest_league, PCA_UBE_df, PCA_operation], parameters = [20, 'UBE'])
+    B_1, A_col_1 = pipeline(func = [filter_by_Game_highest_league, PCA_PSE_df, PCA_operation], parameters = [20, 'PSE'])
+    B_2, A_col_2 = pipeline(func = [filter_by_Game_highest_league, PCA_TPE_df, PCA_operation], parameters = [20, 'TPE'])
+    B_3, A_col_3 = pipeline(func = [filter_by_Game_highest_league, PCA_UDE_df, PCA_operation], parameters = [20, 'UDE'])
+    B_4, A_col_4 = pipeline(func = [filter_by_Game_highest_league, PCA_BCE_df, PCA_operation], parameters = [20, 'BCE'])
 print('exit PCA')
