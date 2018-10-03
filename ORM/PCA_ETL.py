@@ -63,26 +63,26 @@ def PCA_UBE_df(game):
     df_PlayerTwo_ = pd.get_dummies(df_PlayerTwo['unit_type_name']).cumsum()
 
     if game.playerOne_playrace == 'Terran':
-        df_PlayerOne_ = df_PlayerOne_[[col for col in df_PlayerOne_.columns if col in ['Banshee', 'CommandCenter', 'Cyclone', 'Marine', 'Medivac', 'Raven', 'Reaper',
+        df_PlayerOne_ = df_PlayerOne_[[col for col in df_PlayerOne_.columns if col in ['Banshee', 'Cyclone', 'Marine', 'Medivac', 'Raven', 'Reaper',
                                                                                         'SiegeTank', 'VikingFighter', 'Hellion', 'Liberator', 'Thor', 'Marauder',
                                                                                         'WidowMine', 'HellionTank', 'Battlecruiser', 'Ghost']]]
     elif game.playerOne_playrace == 'Protoss':
-        df_PlayerOne_ = df_PlayerOne_[[col for col in df_PlayerOne_.columns if col in ['Nexus', 'Stalker', 'Colossus', 'Disruptor', 'Immortal', 'WarpPrism', 'Observer',
+        df_PlayerOne_ = df_PlayerOne_[[col for col in df_PlayerOne_.columns if col in ['Stalker', 'Colossus', 'Disruptor', 'Immortal', 'WarpPrism', 'Observer',
                                                                                         'Adept', 'Phoenix', 'Oracle', 'Zealot', 'Sentry', 'Tempest', 'Carrier',
                                                                                         'VoidRay', 'Archon', 'Mothership', 'HighTemplar']]]
     else:
-        df_PlayerOne_ = df_PlayerOne_[[col for col in df_PlayerOne_.columns if col in ['Hatchery', 'Roach', 'Baneling',  'Mutalisk', 'Queen', 'Zergling', 'Corruptor', 'Hydralisk',
+        df_PlayerOne_ = df_PlayerOne_[[col for col in df_PlayerOne_.columns if col in ['Roach', 'Baneling',  'Mutalisk', 'Queen', 'Zergling', 'Corruptor', 'Hydralisk',
                                                                                         'Viper', 'Ultralisk']]]
     if game.playerTwo_playrace == 'Terran':
-        df_PlayerTwo_ = df_PlayerTwo_[[col for col in df_PlayerTwo_.columns if col in ['Banshee', 'CommandCenter', 'Cyclone', 'Marine', 'Medivac', 'Raven', 'Reaper',
+        df_PlayerTwo_ = df_PlayerTwo_[[col for col in df_PlayerTwo_.columns if col in ['Banshee', 'Cyclone', 'Marine', 'Medivac', 'Raven', 'Reaper',
                                                                                         'SiegeTank', 'VikingFighter', 'Hellion', 'Liberator', 'Thor', 'Marauder',
                                                                                         'WidowMine', 'HellionTank', 'Battlecruiser', 'Ghost']]]
     elif game.playerTwo_playrace == 'Protoss':
-        df_PlayerTwo_ = df_PlayerTwo_[[col for col in df_PlayerTwo_.columns if col in ['Nexus', 'Stalker', 'Colossus', 'Disruptor', 'Immortal', 'WarpPrism', 'Observer',
+        df_PlayerTwo_ = df_PlayerTwo_[[col for col in df_PlayerTwo_.columns if col in ['Stalker', 'Colossus', 'Disruptor', 'Immortal', 'WarpPrism', 'Observer',
                                                                                         'Adept', 'Phoenix', 'Oracle', 'Zealot', 'Sentry', 'Tempest', 'Carrier',
                                                                                         'VoidRay', 'Archon', 'Mothership', 'HighTemplar']]]
     else:
-        df_PlayerTwo_ = df_PlayerTwo_[[col for col in df_PlayerTwo_.columns if col in ['Hatchery', 'Roach', 'Baneling',  'Mutalisk', 'Queen', 'Zergling', 'Corruptor', 'Hydralisk',
+        df_PlayerTwo_ = df_PlayerTwo_[[col for col in df_PlayerTwo_.columns if col in ['Roach', 'Baneling',  'Mutalisk', 'Queen', 'Zergling', 'Corruptor', 'Hydralisk',
                                                                                         'Viper', 'Ultralisk']]]
 
     df_PlayerOne_o = pd.concat([df_PlayerOne_, df_PlayerOne[['game_id', 'player_id', 'second']]], axis = 1, sort = False)
@@ -247,7 +247,7 @@ def PCA_BCE_df(game):
     #expected output -> [[df, player_id, game_id], [df, player_id, game_id]]
     return [df_PlayerOne_o, game_players[0].id, game_id, game.playerOne_playrace], [df_PlayerTwo_o, game_players[1].id, game_id, game.playerTwo_playrace]
 
-def PCA_operation(events_PCA, event_):
+def PCA_operation(events_PCA, event_, list_of_games):
     #expected input -> [[df, player_id, game_id], [df, player_id, game_id], [df, player_id, game_id], ..., [df, player_id, game_id]]
     events_PCA = [game for game in events_PCA if game != None]
     events_PCA_w_PC = []
@@ -264,21 +264,34 @@ def PCA_operation(events_PCA, event_):
             events_PCA[game][player].append(events_PCA_conglomerate_df[(events_PCA_conglomerate_df['player_id'] == events_PCA[game][player][1]) & (events_PCA_conglomerate_df['game_id'] == events_PCA[game][player][2])])
             #####Remember to put back 'player_id' and 'game_id'
 
-    for game in range(0,len(events_PCA)):
-        for player in range(0,len(events_PCA[game])):
-            df = events_PCA[game][player][0].drop(columns = ['game_id', 'player_id', 'second'])
-            if df.shape[1] == 0:
+    for game in list_of_games:
+        for player in game.players:
+            #import pdb; pdb.set_trace()
+            events_PCA_conglomerate_temp = events_PCA_conglomerate_df[(events_PCA_conglomerate_df['player_id'] == player.id) & (events_PCA_conglomerate_df['game_id'] == game.id)]
+            events_PCA_conglomerate_temp_ = events_PCA_conglomerate_temp.drop(columns = ['player_id', 'game_id', 'second'])
+            if (events_PCA_conglomerate_temp_.shape[1] == 0) or (events_PCA_conglomerate_temp_.shape[0] == 0):
                 break
             mm = MinMaxScaler()
-            df_mm = mm.fit_transform(df)
+            df_mm = mm.fit_transform(events_PCA_conglomerate_temp_)
             _PCA = PCA()
             _PCA.fit(df_mm)
-            ## 'player_id'_'game_id'.joblib
-            joblib.dump(_PCA, 'PCA_Models_'+ event_ +'/' + str(events_PCA[game][player][1]) + '_' + str(events_PCA[game][player][2]) + '.joblib')
-            events_PCA[game][player].append(_PCA)
+            joblib.dump(_PCA, 'PCA_Models_'+ event_ +'/' + str(player.id) + '_' + str(game.id) + '.joblib')
+
+    # for game in range(0,len(events_PCA)):
+    #     for player in range(0,len(events_PCA[game])):
+    #         df = events_PCA[game][player][0].drop(columns = ['game_id', 'player_id', 'second'])
+    #         if df.shape[1] == 0:
+    #             break
+    #         mm = MinMaxScaler()
+    #         df_mm = mm.fit_transform(df)
+    #         _PCA = PCA()
+    #         _PCA.fit(df_mm)
+    #         ## 'player_id'_'game_id'.joblib
+    #         joblib.dump(_PCA, 'PCA_Models_'+ event_ +'/' + str(events_PCA[game][player][1]) + '_' + str(events_PCA[game][player][2]) + '.joblib')
+    #         events_PCA[game][player].append(_PCA)
 
     #expected output -> [[[df, player_id, game_id, df_A, PCAobject], [df, player_id, game_id, df_A, PCAobject]], [[df, player_id, game_id, df_A, PCAobject], ..., [df, player_id, game_id, df_A, PCAobject]]
-    return events_PCA, events_PCA[0][0][0].columns
+    return events_PCA_conglomerate_df #events_PCA, events_PCA[0][0][0].columns
 
 def TSVD_operation(events_PCA, event_):
     #expected input -> [[df, player_id, game_id], [df, player_id, game_id], [df, player_id, game_id], ..., [df, player_id, game_id]]
@@ -330,14 +343,16 @@ def pipeline(func = [None, PCA_UBE_df, PCA_operation], parameters =[None, 'UBE']
     else:
         games = func[0](parameters[0])
     A = [func[1](game) for game in games]
-    B = func[2](A, parameters[1])
+    B = func[2](A, parameters[1], parameters[2])
     return B
 
+A = filter_by_Game_highest_league(20)
 
 if False:
-    B_0, A_col_0 = pipeline(func = [filter_by_Game_highest_league, PCA_UBE_df, PCA_operation], parameters = [20, 'UBE'])
-    B_1, A_col_1 = pipeline(func = [filter_by_Game_highest_league, PCA_PSE_df, PCA_operation], parameters = [20, 'PSE'])
-    B_2, A_col_2 = pipeline(func = [filter_by_Game_highest_league, PCA_TPE_df, PCA_operation], parameters = [20, 'TPE'])
-    B_3, A_col_3 = pipeline(func = [filter_by_Game_highest_league, PCA_UDE_df, PCA_operation], parameters = [20, 'UDE'])
-    B_4, A_col_4 = pipeline(func = [filter_by_Game_highest_league, PCA_BCE_df, PCA_operation], parameters = [20, 'BCE'])
+    B_0, A_col_0 = pipeline(func = [filter_by_Game_highest_league, PCA_UBE_df, PCA_operation], parameters = [20, 'UBE', A]) #complete
+    B_1, A_col_1 = pipeline(func = [filter_by_Game_highest_league, PCA_PSE_df, PCA_operation], parameters = [20, 'PSE', A]) #complete
+    B_2, A_col_2 = pipeline(func = [filter_by_Game_highest_league, PCA_TPE_df, PCA_operation], parameters = [20, 'TPE', A]) #complete
+    B_3, A_col_3 = pipeline(func = [filter_by_Game_highest_league, PCA_UDE_df, PCA_operation], parameters = [20, 'UDE', A]) #complete
+    B_4, A_col_4 = pipeline(func = [filter_by_Game_highest_league, PCA_BCE_df, PCA_operation], parameters = [20, 'BCE', A]) #complete
+
 print('exit PCA')
