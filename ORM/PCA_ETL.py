@@ -42,10 +42,10 @@ offline.init_notebook_mode()
 #||||||||||||||||||||||||||||||||||||||DataFrame Construction||Feature Selection
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-def explore_r4(x,y,z,u):
+def explore_r4(x,y,z,u,name):
      traces = go.Scatter3d(x = np.array(x), y = np.array(y), z = np.array(z), mode='markers', marker=dict(size = 3, color = u, colorscale = 'Jet', opacity = 0))
      fig = go.Figure(data=[traces])
-     offline.plot(fig)
+     offline.plot(fig, filename = 'plotly_files/' + name + '.html', auto_open=False)
      return None
 
 def PCA_UBE_df(game):
@@ -324,7 +324,7 @@ def TSVD_operation(events_PCA, event_):
     #expected output -> [[[df, player_id, game_id, df_A, PCAobject], [df, player_id, game_id, df_A, PCAobject]], [[df, player_id, game_id, df_A, PCAobject], ..., [df, player_id, game_id, df_A, PCAobject]]
     return events_PCA, events_PCA[0][0][0].columns
 
-def plot_df_vectors(PCA_df, race):
+def plot_df_vectors(PCA_df, race, name):
     PCA_df = [game for game in PCA_df if game != None]
     if race == None:
         PCA_df_ = [df_list[player][0] for df_list in PCA_df for player in range(0,len(df_list))]
@@ -333,9 +333,9 @@ def plot_df_vectors(PCA_df, race):
     PCA_df_o = pd.concat(PCA_df_, sort = False).fillna(0).drop(columns = ['game_id', 'player_id', 'second'])
     mm = MinMaxScaler()
     df_mm = mm.fit_transform(PCA_df_o)
-    pca = PCA(n_components = 4)
+    pca = PCA()
     tr = pca.fit_transform(df_mm)
-    explore_r4(tr[:,0], tr[:,1], tr[:,2], tr[:,3])
+    explore_r4(tr[:,0], tr[:,1], tr[:,2], tr[:,3], name)
 
 def pipeline(func = [None, PCA_UBE_df, PCA_operation], parameters =[None, 'UBE']):
     if parameters[0] == None:
@@ -346,7 +346,7 @@ def pipeline(func = [None, PCA_UBE_df, PCA_operation], parameters =[None, 'UBE']
     B = func[2](A, parameters[1], parameters[2])
     return B
 
-A = filter_by_Game_highest_league(20)
+#A = filter_by_Game_highest_league(20)
 
 if False:
     B_0, A_col_0 = pipeline(func = [filter_by_Game_highest_league, PCA_UBE_df, PCA_operation], parameters = [20, 'UBE', A]) #complete

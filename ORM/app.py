@@ -16,7 +16,10 @@ from routes import *
 app.layout = html.Div(children = [
     dcc.Tabs(id = 'tabs', value = 1, children = [
         dcc.Tab(label = 'PSE by Player', value = 1),
-        dcc.Tab(label = 'UBE/PSE by Game', value = 2)
+        #dcc.Tab(label = 'UBE/PSE by Game', value = 2),
+        dcc.Tab(label = 'Events Aggregate', value = 3),
+        dcc.Tab(label = 'Events PCA', value = 4),
+        #dcc.Tab(label = 'Events PCA Unsupervised', value = 5)
     ]),
     html.Div(id = 'tab_Output')
 ])
@@ -31,17 +34,47 @@ def display_content(value):
     if value == 1:
         return [
             html.H3(children='PSE by Player'),
-            dcc.Dropdown(id = 'PlayerStatsEventPlayer-options', options = get_PSE_label(), value = get_PSE_label()[1]),
-            dcc.Dropdown(id = 'Player-options', options = get_Player_names(), value = get_Player_names()[0]),
+            dcc.Dropdown(id = 'PlayerStatsEventPlayer-options', options = get_PSE_label()),
+            dcc.Dropdown(id = 'Player-options', options = get_Player_names()),
             dcc.Graph(id='PlayerStatsEventPlayer-graph')
                 ]
     elif value == 2:
         return [
             html.H3(children='UBE/PSE by Game'),
-            dcc.Dropdown(id = 'Game-options_3', options = [{'label': 'PSE', 'value': 1}, {'label': 'UBE', 'value': 2}], value = 1),
-            dcc.Dropdown(id = 'Game-options_2', options = get_Game_names(), value = get_Game_names()[0]),
+            dcc.Dropdown(id = 'Game-options_3', options = [{'label': 'PSE', 'value': 1}, {'label': 'UBE', 'value': 2}]),
+            dcc.Dropdown(id = 'Game-options_2', options = get_Game_names()),
             dcc.Graph(id='PlayerStatsEvent-graph_2')
                 ]
+    elif value == 3:
+        return [
+            html.H3(children = 'Events Aggregate'),
+            dcc.Dropdown(id = 'Game-options_4', options = [{'label': 'Terran', 'value': 'Terran'}, {'label': 'Zerg', 'value': 'Zerg'}, {'label': 'Protoss', 'value': 'Protoss'}]),
+            dcc.Dropdown(id = 'Game-options_4_1', options = [{'label': 'BCE', 'value': 'BCE'}, {'label': 'TPE', 'value': 'TPE'},
+                                                             {'label': 'UBE', 'value': 'UBE'}, {'label': 'UDE', 'value': 'UDE'},
+                                                             {'label': 'PSE', 'value': 'PSE'}]),
+            html.Iframe(id = 'plotly_agg_out',srcDoc = open('plotly_files/Terran_BCE_Agg.html', 'r').read(), width ='100%', height= '900')
+        ]
+    elif value == 4:
+        return [
+            html.H3(children = 'Events PCA'),
+            dcc.Dropdown(id = 'Game-options_5', options = [{'label': 'Terran', 'value': 'Terran'}, {'label': 'Zerg', 'value': 'Zerg'}, {'label': 'Protoss', 'value': 'Protoss'}]),
+            dcc.Dropdown(id = 'Game-options_5_1', options = [{'label': 'BCE', 'value': 'BCE'}, {'label': 'TPE', 'value': 'TPE'},
+                                                             {'label': 'UBE', 'value': 'UBE'}, {'label': 'UDE', 'value': 'UDE'},
+                                                             {'label': 'PSE', 'value': 'PSE'}]),
+            html.Iframe(id = 'plotly_PCA_out',srcDoc = open('plotly_files/Terran_BCE_PCA.html', 'r').read(), width ='100%', height= '900')
+        ]
+    elif value == 5:
+        return [
+            html.H3(children = 'Events PCA Cluster'),
+            dcc.Dropdown(id = 'race_6', options = [{'label': 'Terran', 'value': 'Terran'}, {'label': 'Zerg', 'value': 'Zerg'}, {'label': 'Protoss', 'value': 'Protoss'}]),
+            dcc.Dropdown(id = 'event_6', options = [{'label': 'BCE', 'value': 'BCE'}, {'label': 'TPE', 'value': 'TPE'},
+                                                             {'label': 'UBE', 'value': 'UBE'}, {'label': 'UDE', 'value': 'UDE'},
+                                                             {'label': 'PSE', 'value': 'PSE'}]),
+            dcc.Dropdown(id = 'unsupervised_6', options = [{'label': 'GaussianMixture', 'value': 'GM'}, {'label': 'KMeans', 'value': 'KM'}]),
+            dcc.Dropdown(id = 'n_clusters_6', options = [{'label': str(i), 'value': str(i)} for i in range(2,10)]),
+            html.Iframe(id = 'plotly_PCA_unsupervised_out',srcDoc = open('plotly_files/Protoss_BCE_GM_2_unsupervised.html', 'r').read(), width ='100%', height= '900')
+        ]
+
 
 @app.callback(Output(component_id = 'PlayerStatsEventPlayer-graph', component_property = 'figure'),
                 [Input(component_id = 'PlayerStatsEventPlayer-options', component_property = 'value'),
@@ -52,7 +85,7 @@ def construct_PSEGraph_Player(input_1, input_2):
     player_PSE_df = pd.DataFrame([vars(event) for event in player_PSE])
 
     return {'data' : [go.Scatter(x = player_PSE_df[player_PSE_df['player_id'] == player_.id]['second'], y = player_PSE_df[player_PSE_df['player_id'] == player_.id][input_1], mode = 'markers')],
-            'layout' : go.Layout(title= "PSE - " + input_1 + ' - ' + input_2, height = 700, width = 1400)}
+            'layout' : go.Layout(title= "PSE - " + input_1 + ' - ' + input_2, height = 400, width = 700)}
 
 @app.callback(Output(component_id = 'PlayerStatsEvent-graph_2', component_property = 'figure'),
                 [Input(component_id = 'Game-options_2', component_property = 'value'),
@@ -67,7 +100,7 @@ def construct_PSEHeatmep_Game(input_1, input_2):
         df = df.drop(columns = ['player_id', 'second'])
         filtered_game_PSE_ = np.array(df).T
         return {'data' : [go.Heatmap(z = filtered_game_PSE_, y = df.columns)],
-                'layout' : go.Layout(title= "PSE - " + input_1, height = 700, width = 1400)}
+                'layout' : go.Layout(title= "PSE - " + input_1, height = 500, width = 1000)}
     if input_2 == 2:
         game_PSE = game_.events_UBE
         filtered_game_PSE = pd.DataFrame([vars(event) for event in game_PSE])
@@ -84,10 +117,37 @@ def construct_PSEHeatmep_Game(input_1, input_2):
         df = df.drop(columns = ['player_id', 'second'])
         filtered_game_PSE_ = np.array(df).T
         return {'data' : [go.Heatmap(z = filtered_game_PSE_, y = df.columns)],
-                'layout' : go.Layout(title= "PSE - " + input_1, height = 700, width = 1400)}
-    if input_2 == 3:
-        #BCE
-        pass
+                'layout' : go.Layout(title= "PSE - " + input_1, height = 500, width = 1000)}
+
+@app.callback(Output(component_id = 'plotly_agg_out', component_property = 'srcDoc'),
+                [Input(component_id = 'Game-options_4', component_property = 'value'),
+                    Input(component_id = 'Game-options_4_1', component_property = 'value')])
+def load_plotly_agg(input_1, input_2):
+    #print('/Users/flatironschool/Desktop/PySC2/sc2reader/ORM/plotly_files/' + input_1 + '_' + input_2 + '_Agg.html')
+    return open('/Users/flatironschool/Desktop/PySC2/sc2reader/ORM/plotly_files/' + input_1 + '_' + input_2 + '_Agg.html', 'r').read()
+
+@app.callback(Output(component_id = 'plotly_PCA_out', component_property = 'srcDoc'),
+                [Input(component_id = 'Game-options_5', component_property = 'value'),
+                    Input(component_id = 'Game-options_5_1', component_property = 'value')])
+def load_plotly_PCA(input_1, input_2):
+    #print('/Users/flatironschool/Desktop/PySC2/sc2reader/ORM/plotly_files/' + input_1 + '_' + input_2 + '_Agg.html')
+    return open('/Users/flatironschool/Desktop/PySC2/sc2reader/ORM/plotly_files/' + input_1 + '_' + input_2 + '_PCA.html', 'r').read()
+
+@app.callback(Output(component_id = 'plotly_PCA_unsupervised_out', component_property = 'srcDoc'),
+                [Input(component_id = 'race_6', component_property = 'value'),
+                    Input(component_id = 'event_6', component_property = 'value'),
+                        Input(component_id = 'unsupervised_6', component_property = 'value'),
+                            Input(component_id = 'n_clusters_6', component_property = 'value')])
+def load_plotly_PCA(input_1, input_2, input_3, input_4):
+    #print('/Users/flatironschool/Desktop/PySC2/sc2reader/ORM/plotly_files/' + input_1 + '_' + input_2 + '_Agg.html')
+    return open('/Users/flatironschool/Desktop/PySC2/sc2reader/ORM/plotly_files/' + input_1 + '_' + input_2 + '_' + input_3 + '_' + input_4 +'_unsupervised.html', 'r').read()
+
+###Add:
+#----- PCA_df plot
+#----- PCA_FPC plot
+#----- Cluster plot
+#----- attempt at displaying cluster content via explore (All Professional Replays)
+
 
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #run||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
