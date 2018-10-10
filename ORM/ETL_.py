@@ -31,6 +31,12 @@ from models import Participant, User, Game, PlayerStatsEvent, UnitBornEvent, Uni
     # 3) Participant(Game, User)
     # 4) [Event(Participant) for event in EVENTS]
 
+# Game - Participant - User
+#             |
+#           events
+
+#consider rebuilding 'construct_objects(replay_file)' function
+
 def construct_objects(replay_file, pro = False):
     try:
         #import pdb; pdb.set_trace()
@@ -69,8 +75,8 @@ def construct_objects(replay_file, pro = False):
             avg_apm_playerTwo = -1
 
         print('j')
-        players = [playerOne, playerTwo]
-        #players = [Player(name = player.name, region = player.region, subregion = player.subregion) for player in replay.players]
+        users = [playerOne, playerTwo]
+        players = [Player(name = player.name, region = player.region, subregion = player.subregion) for player in replay.players]
         game = Game(players = players, name = str(replay.date) + '_' + replay.players[0].play_race + ' v ' + replay.players[1].play_race,
                     map = replay.map_name,
                     playerOne_name = players[0].name,
@@ -89,6 +95,7 @@ def construct_objects(replay_file, pro = False):
                     time_zone = replay.time_zone,
                     )
 
+        participants = [Participant(game = game, user = user[0], ...)] #build out
         events = replay.events
         playerOne_events = []
         playerTwo_events = []
@@ -368,9 +375,13 @@ def get_professional_replays(matchup):
     return ['../sc2_Replays/STReplays'+ matchup + '/' + file for file in os.listdir('../sc2_Replays/STReplays' + matchup)]
 
 #[construct_objects(replay) for replay in get_replays('Bronze', 2000)]
+print('Bronze Complete____________________________________________________')
 #[construct_objects(replay) for replay in get_replays('Silver', 2000)]
+print('Silver Complete____________________________________________________')
 #[construct_objects(replay) for replay in get_replays('Gold', 2000)]
+print('Gold Complete____________________________________________________')
 #[construct_objects(replay) for replay in get_replays('Platinum', 2000)]
+print('Platinum Complete____________________________________________________')
 #[construct_objects(replay) for replay in get_replays('Diamond', 2000)]
 print('Diamond Complete____________________________________________________')
 #[construct_objects(replay) for replay in get_replays('Master', 2000)]

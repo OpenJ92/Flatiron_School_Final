@@ -40,6 +40,13 @@ class Participant(db.Model):
     avg_apm = db.Column(db.Float)
     winner = db.Column(db.Boolean)
 
+    # 5 experiments?:
+    # cat_1 = db.Column(db.Integer)
+    # cat_2 = db.Column(db.Integer)
+    # cat_3 = db.Column(db.Integer)
+    # cat_4 = db.Column(db.Integer)
+    # cat_5 = db.Column(db.Integer)
+
     events_PSE = db.relationship('PlayerStatsEvent', back_populates = 'game')
     events_UBE = db.relationship('UnitBornEvent', back_populates = 'game')
     events_UTCE = db.relationship('UnitTypeChangeEvent', back_populates = 'game')
