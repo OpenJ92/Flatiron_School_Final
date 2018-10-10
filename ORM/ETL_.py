@@ -6,10 +6,30 @@ from sqlalchemy import or_
 from sc2reader.engine.plugins import SelectionTracker, APMTracker
 sc2reader.engine.register_plugin(SelectionTracker())
 sc2reader.engine.register_plugin(APMTracker())
-from models import Player, Game, PlayerStatsEvent, UnitBornEvent, UnitDiedEvent, \
+from models import Participant, User, Game, PlayerStatsEvent, UnitBornEvent, UnitDiedEvent, \
                         UnitTypeChangeEvent, UpgradeCompleteEvent, UnitDoneEvent, \
                         BasicCommandEvent, TargetPointEvent, Player_Games, Player_UDiE
 
+# Evaluate new schema --
+
+# User
+    # has-one:
+    # has-many: Participants
+# Participant
+    # has-one: Game, User
+    # has-many: Events
+# Game
+    # has-one:
+    # has-many: Participants
+# Events
+    # has-one: Participant
+    # has-many:
+
+# ORDER OF CONSTRUCTION:
+    # 1) User -- if not yet constructed
+    # 2) Game
+    # 3) Participant(Game, User)
+    # 4) [Event(Participant) for event in EVENTS]
 
 def construct_objects(replay_file, pro = False):
     try:
@@ -21,14 +41,14 @@ def construct_objects(replay_file, pro = False):
             print('Game: exists ------------------')
             return None
 
-        playerOne = db.session.query(Player).filter_by(name = replay.players[0].name).first()
-        playerTwo = db.session.query(Player).filter_by(name = replay.players[1].name).first()
+        playerOne = db.session.query(User).filter_by(name = replay.players[0].name).first()
+        playerTwo = db.session.query(User).filter_by(name = replay.players[1].name).first()
 
         if playerOne == None:
-            playerOne = Player(name = replay.players[0].name, region = replay.players[0].region, subregion = replay.players[0].subregion)
+            playerOne = User(name = replay.players[0].name, region = replay.players[0].region, subregion = replay.players[0].subregion)
 
         if playerTwo == None:
-            playerTwo = Player(name = replay.players[1].name, region = replay.players[1].region, subregion = replay.players[1].subregion)
+            playerTwo = User(name = replay.players[1].name, region = replay.players[1].region, subregion = replay.players[1].subregion)
 
         if replay.players[0].is_human:
             highest_league_playerOne = replay.players[0].highest_league

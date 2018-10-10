@@ -53,7 +53,7 @@ def scrape_Category(category, start = 1, mode = 'w'):
         soup = BeautifulSoup(r, "html.parser")
         W = [(link + td.a['href'], td.a.text) for td in soup.find_all('td', class_ = 'map nowrap')]
         Q += W
-        
+
     driver.quit()
     with open('./sc2_Replays/' + page_name[category - 1] + '/' + page_name[category - 1] + '_links.txt', mode) as f:
         for item in Q:
@@ -84,6 +84,7 @@ def scrape_Replay(league, numSamples, start = 0, stop = None, getReplay = False)
         try:
             download_link = 'https://gggreplays.com/' + link_[0]['href']
             if getReplay:
+                time.sleep(2.0)
                 driver.get(download_link)
         except:
             pass
@@ -94,5 +95,10 @@ def scrape_Replay(league, numSamples, start = 0, stop = None, getReplay = False)
 
     return Q
 
-scrape_Replay('Grand_Master', 0, start = 0, stop = 100, getReplay = True)
-#scrape_Replay('Silver', numSamples = 0, start = 9725, getReplay = True)
+#scrape_Replay('Bronze', numSamples = 0, start = 0, getReplay = True)
+#scrape_Replay('Silver', numSamples = 0, start = 0, getReplay = True)
+scrape_Replay('Gold', numSamples = 0, start = 102, getReplay = True)
+scrape_Replay('Platinum', numSamples = 0, start = 0, getReplay = True)
+scrape_Replay('Diamond', numSamples = 0, start = 0, getReplay = True)
+scrape_Replay('Master', numSamples = 0, start = 0, getReplay = True)
+scrape_Replay('Grand_Master', numSamples = 0, start = 0, getReplay = True)
