@@ -84,7 +84,7 @@ def scrape_Replay(league, numSamples, start = 0, stop = None, getReplay = False)
         try:
             download_link = 'https://gggreplays.com/' + link_[0]['href']
             if getReplay:
-                time.sleep(2.0)
+                time.sleep(1.5)
                 driver.get(download_link)
         except:
             pass
@@ -97,8 +97,8 @@ def scrape_Replay(league, numSamples, start = 0, stop = None, getReplay = False)
 
 #scrape_Replay('Bronze', numSamples = 0, start = 0, getReplay = True)
 #scrape_Replay('Silver', numSamples = 0, start = 0, getReplay = True)
-scrape_Replay('Gold', numSamples = 0, start = 102, getReplay = True)
-scrape_Replay('Platinum', numSamples = 0, start = 0, getReplay = True)
+#scrape_Replay('Gold', numSamples = 0, start = 102, getReplay = True)
+scrape_Replay('Platinum', numSamples = 0, start = 12477, getReplay = True)
 scrape_Replay('Diamond', numSamples = 0, start = 0, getReplay = True)
 scrape_Replay('Master', numSamples = 0, start = 0, getReplay = True)
 scrape_Replay('Grand_Master', numSamples = 0, start = 0, getReplay = True)

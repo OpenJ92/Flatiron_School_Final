@@ -8,11 +8,12 @@ print('enter models.py')
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 class User(db.Model):
-    __tablename__ = 'players'
+    __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key = True)
-    games = db.relationship('Game', secondary = 'players_games', back_populates = 'players')
-    participants = db.relationship('Participant')
+    #participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
+
+    participants = db.relationship('Participant', back_populates = 'user')
 
     name = db.Column(db.Text)
     region = db.Column(db.Text)
@@ -29,9 +30,11 @@ class Participant(db.Model):
     __tablename__ = 'participants'
 
     id = db.Column(db.Integer, primary_key = True)
+    game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    game = db.relationship('Game')
-    user = db.relationship('User')
+    game = db.relationship('Game', back_populates = 'participants')
+    user = db.relationship('User', back_populates = 'participants')
 
     name = db.Column(db.Text)
     league = db.Column(db.Text)
@@ -41,24 +44,26 @@ class Participant(db.Model):
     winner = db.Column(db.Boolean)
 
     # 5 experiments?:
-    # cat_1 = db.Column(db.Integer)
-    # cat_2 = db.Column(db.Integer)
-    # cat_3 = db.Column(db.Integer)
-    # cat_4 = db.Column(db.Integer)
-    # cat_5 = db.Column(db.Integer)
+    cat_1 = db.Column(db.Integer)
+    cat_2 = db.Column(db.Integer)
+    cat_3 = db.Column(db.Integer)
+    cat_4 = db.Column(db.Integer)
+    cat_5 = db.Column(db.Integer)
 
-    events_PSE = db.relationship('PlayerStatsEvent', back_populates = 'game')
-    events_UBE = db.relationship('UnitBornEvent', back_populates = 'game')
-    events_UTCE = db.relationship('UnitTypeChangeEvent', back_populates = 'game')
-    events_UCE = db.relationship('UpgradeCompleteEvent', back_populates = 'game')
-    events_UIE = db.relationship('UnitInitEvent', back_populates = 'game')
-    events_UDE = db.relationship('UnitDoneEvent', back_populates = 'game')
-    events_BCE = db.relationship('BasicCommandEvent', back_populates = 'game')
-    events_TPE = db.relationship('TargetPointEvent', back_populates = 'game')
-    events_UDiE = db.relationship('UnitDiedEvent', back_populates = 'game')
-    events_UDiE_player = db.relationship('UnitDiedEvent', secondary = 'players_ude', back_populates = 'player')
-    events_UDiE_killing_player = db.relationship('UnitDiedEvent', secondary = 'players_ude', back_populates = 'killing_player')
+    events_PSE = db.relationship('PlayerStatsEvent', back_populates = 'participant')
+    events_UBE = db.relationship('UnitBornEvent', back_populates = 'participant')
+    events_UTCE = db.relationship('UnitTypeChangeEvent', back_populates = 'participant')
+    events_UCE = db.relationship('UpgradeCompleteEvent', back_populates = 'participant')
+    events_UIE = db.relationship('UnitInitEvent', back_populates = 'participant')
+    events_UDE = db.relationship('UnitDoneEvent', back_populates = 'participant')
+    events_BCE = db.relationship('BasicCommandEvent', back_populates = 'participant')
+    events_TPE = db.relationship('TargetPointEvent', back_populates = 'participant')
+    events_UDiE = db.relationship('UnitDiedEvent', back_populates = 'participant')
+    events_UDiE_participant = db.relationship('UnitDiedEvent', secondary = 'players_ude', back_populates = 'participant')
+    events_UDiE_killing_participant = db.relationship('UnitDiedEvent', secondary = 'players_ude', back_populates = 'killing_participant')
 
+    #think about how to fix UDiE events
+    
     def __repr__(self):
         return '<Participant (name = ' + self.name + ') >'
 
@@ -70,7 +75,7 @@ class Game(db.Model):
     __tablename__ = 'games'
 
     id = db.Column(db.Integer, primary_key = True)
-    players = db.relationship('Player',  secondary = 'players_games', back_populates = 'games')
+    participants = db.relationship('Participant', back_populates = 'game')
 
     name = db.Column(db.Text)
     map = db.Column(db.Text)
@@ -82,7 +87,7 @@ class Game(db.Model):
     time_zone = db.Column(db.Float)
 
     def __repr__(self):
-        return '<Game (map = ' + self.map + ', matchup = ' + self.playerOne_playrace + ' v. ' + self.playerTwo_playrace + ') >'
+        return '<Game (map = ' + self.map + ', name = '+ self.name +') >'
 
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||Events
@@ -152,7 +157,7 @@ class PlayerStatsEvent(db.Model):
     ff_vespene_lost_technology = db.Column(db.Float)
 
     def __repr__(self):
-        return '<' + self.name + ' (player = ' + self.player.name + ') >'
+        return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
 class UnitBornEvent(db.Model):
     __tablename__ = 'unitbornevents'
@@ -170,7 +175,7 @@ class UnitBornEvent(db.Model):
     loc_y = db.Column(db.Float)
 
     def __repr__(self):
-        return '<' + self.name + ' (player = ' + self.player.name + ') >'
+        return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
 #Take a closer look at this
 class UnitDiedEvent(db.Model):
@@ -179,8 +184,8 @@ class UnitDiedEvent(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
     #game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
-    player = db.relationship('Participant', secondary = 'players_ude', back_populates = 'events_UDiE_player')
-    killing_player = db.relationship('Participant', secondary = 'players_ude', back_populates = 'events_UDiE_killing_player')
+    participant = db.relationship('Participant', secondary = 'players_ude', back_populates = 'events_UDiE_participant')
+    killing_participant = db.relationship('Participant', secondary = 'players_ude', back_populates = 'events_UDiE_killing_participant')
     #game = db.relationship('Game', back_populates = 'events_UDiE')
 
     name = db.Column(db.Text)
@@ -191,7 +196,7 @@ class UnitDiedEvent(db.Model):
     loc_y = db.Column(db.Float)
 
     def __repr__(self):
-        return '<' + self.name + ' (player = ' + self.player[0].name + ', killing_player = ' + self.killing_player[0].name + ') >'
+        return '<' + self.name + ' (participant = ' + self.participant[0].name + ', killing_participant = ' + self.killing_participant[0].name + ') >'
 
 class UnitTypeChangeEvent(db.Model):
     __tablename__ = 'unittypechangeevents'
@@ -208,7 +213,7 @@ class UnitTypeChangeEvent(db.Model):
     unit_type_name = db.Column(db.Text)
 
     def __repr__(self):
-        return '<' + self.name + ' (player = ' + self.player.name + ') >'
+        return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
 class UpgradeCompleteEvent(db.Model):
     __tablename__ = 'upgradecompleteevents'
@@ -224,7 +229,7 @@ class UpgradeCompleteEvent(db.Model):
     upgrade_type_name = db.Column(db.Text)
 
     def __repr__(self):
-        return '<' + self.name + ' (player = ' + self.player.name + ') >'
+        return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
 class UnitInitEvent(db.Model):
     __tablename__ = 'unitinitevent'
@@ -232,7 +237,7 @@ class UnitInitEvent(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
     #game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
-    participant = db.relationship('Participants', back_populates = 'events_UIE')
+    participant = db.relationship('Participant', back_populates = 'events_UIE')
     #game = db.relationship('Game', back_populates = 'events_UIE')
 
     name = db.Column(db.Text)
@@ -242,7 +247,7 @@ class UnitInitEvent(db.Model):
     loc_y = db.Column(db.Float)
 
     def __repr__(self):
-        return '<' + self.name + ' (player = ' + self.player.name + ') >'
+        return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
 class UnitDoneEvent(db.Model):
     __tablename__ = 'unitdoneevent'
@@ -258,7 +263,7 @@ class UnitDoneEvent(db.Model):
     unit = db.Column(db.Text)
 
     def __repr__(self):
-        return '<' + self.name + ' (player = ' + self.player.name + ') >'
+        return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
 class BasicCommandEvent(db.Model):
     __tablename__ = 'basiccommandevent'
@@ -274,7 +279,7 @@ class BasicCommandEvent(db.Model):
     ability_name = db.Column(db.Text)
 
     def __repr__(self):
-        return '<' + self.name + ' (player = ' + self.player.name + ') >'
+        return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
 class TargetPointEvent(db.Model):
     __tablename__ = 'targetpointevent'
@@ -292,7 +297,7 @@ class TargetPointEvent(db.Model):
     loc_y = db.Column(db.Float)
 
     def __repr__(self):
-        return '<' + self.name + ' (player = ' + self.player.name + ') >'
+        return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||Join
@@ -300,20 +305,20 @@ class TargetPointEvent(db.Model):
 
 ##Do we need these??
 
-class Player_Games(db.Model):
-    __tablename__ = 'players_games'
-
-    id = db.Column(db.Integer, primary_key = True)
-    player_id = db.Column(db.Integer, db.ForeignKey('players.id'))
-    game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
-
+# class Player_Games(db.Model):
+#     __tablename__ = 'players_games'
+#
+#     id = db.Column(db.Integer, primary_key = True)
+#     player_id = db.Column(db.Integer, db.ForeignKey('players.id'))
+#     game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
+#
 class Player_UDiE(db.Model):
     __tablename__ = 'players_ude'
 
     id = db.Column(db.Integer, primary_key = True)
-    player_id = db.Column(db.Integer, db.ForeignKey('players.id'))
+    participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
     unitdiedevents_id = db.Column(db.Integer, db.ForeignKey('unitdiedevents.id'))
 
-#db.create_all()
+db.create_all()
 
 print('exit models.py')
