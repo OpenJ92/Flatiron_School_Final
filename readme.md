@@ -1,10 +1,9 @@
 #### Flatiron_School_Final
 
 ## Web Scrape:
-see: WebS_.py
-'''
-hello world
-'''
+see: WebS_.py and Sc.py - lines(19 - 60)
+
+While the Starcraft 2 replay files are not found in this repository, The means by which one can retrieve them are. In this script, I use BeautifulSoup, selenium, requests among many other libraries to pull replays from https://gggreplays.com/ and https://lotv.spawningtool.com/. (See import commands at the top of each file for further details)
 
 ## Extract Transform Load:
 see: ./ORM/ETL_.py and ./ORM/models.py
