@@ -16,11 +16,10 @@ see: ./ORM/unsupervised.py
 see: ./ORM/unsupervised_cos.py
 
 ## to-Do
-# Dense Neural Network player_state -f-> action:  (in Progress)
+### Dense Neural Network player_state -f-> action:  (in Progress)
 see: ML.py and ML_Sc.py and TreeBot.py for initial experiments
-# Weighted Vector Space on strategy to construct 'Newtonian Gravitational field' to make decision player_state -f-> action: (in Progress)
+### Weighted Vector Space on strategy to construct 'Newtonian Gravitational field' to make decision player_state -f-> action: (in Progress)
 see: under construction
-# Construct Convolutional data from player A perspective: (in Progress)
+### Construct Convolutional data from player A perspective: (in Progress)
 see: A way to capture known partial information of Player B Strategy (Estimate player B strategy) adjust own strategy accordingly ie change Weighted Vector Space.
 under construction
-#
