@@ -11,7 +11,7 @@ class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key = True)
-    #participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
+    participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
 
     participants = db.relationship('Participant', back_populates = 'user')
 
@@ -22,6 +22,10 @@ class User(db.Model):
     def __repr__(self):
         return '<User (name = ' + self.name + ') >'
 
+    @classmethod
+    def all(cls):
+        return db.session.query(cls).all()
+
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||Participant
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -30,10 +34,10 @@ class Participant(db.Model):
     __tablename__ = 'participants'
 
     id = db.Column(db.Integer, primary_key = True)
-    game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    #game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
+    #user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    game = db.relationship('Game', back_populates = 'participants')
+    game = db.relationship('Game', secondary = 'players_games', back_populates = 'participants')
     user = db.relationship('User', back_populates = 'participants')
 
     name = db.Column(db.Text)
@@ -59,13 +63,15 @@ class Participant(db.Model):
     events_BCE = db.relationship('BasicCommandEvent', back_populates = 'participant')
     events_TPE = db.relationship('TargetPointEvent', back_populates = 'participant')
     events_UDiE = db.relationship('UnitDiedEvent', back_populates = 'participant')
-    events_UDiE_participant = db.relationship('UnitDiedEvent', secondary = 'players_ude', back_populates = 'participant')
-    events_UDiE_killing_participant = db.relationship('UnitDiedEvent', secondary = 'players_ude', back_populates = 'killing_participant')
 
-    #think about how to fix UDiE events
-    
     def __repr__(self):
         return '<Participant (name = ' + self.name + ') >'
+
+    @classmethod
+    def all(cls):
+        return db.session.query(cls).all()
+
+    # def construct dataframe per event type
 
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||Game
@@ -75,7 +81,9 @@ class Game(db.Model):
     __tablename__ = 'games'
 
     id = db.Column(db.Integer, primary_key = True)
-    participants = db.relationship('Participant', back_populates = 'game')
+    participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
+
+    participants = db.relationship('Participant', secondary = 'players_games', back_populates = 'game')
 
     name = db.Column(db.Text)
     map = db.Column(db.Text)
@@ -89,6 +97,10 @@ class Game(db.Model):
     def __repr__(self):
         return '<Game (map = ' + self.map + ', name = '+ self.name +') >'
 
+    @classmethod
+    def all(cls):
+        return db.session.query(cls).all()
+
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||Events
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -98,9 +110,7 @@ class PlayerStatsEvent(db.Model):
 
     id = db.Column(db.Integer, primary_key = True)
     participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
-    #game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
     participant = db.relationship('Participant', back_populates = 'events_PSE')
-    #game = db.relationship('Game', back_populates = 'events_PSE')
 
     name = db.Column(db.Text)
     second = db.Column(db.Float)
@@ -159,14 +169,17 @@ class PlayerStatsEvent(db.Model):
     def __repr__(self):
         return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
+    @classmethod
+    def all(cls):
+        return db.session.query(cls).all()
+
 class UnitBornEvent(db.Model):
     __tablename__ = 'unitbornevents'
 
     id = db.Column(db.Integer, primary_key = True)
     participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
-    #game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
+
     participant = db.relationship('Participant', back_populates = 'events_UBE')
-    #game = db.relationship('Game', back_populates = 'events_UBE')
 
     name = db.Column(db.Text)
     second = db.Column(db.Float)
@@ -177,16 +190,22 @@ class UnitBornEvent(db.Model):
     def __repr__(self):
         return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
+    @classmethod
+    def all(cls):
+        return db.session.query(cls).all()
+
+    @classmethod
+    def get_unique_event_names(cls):
+        return list(set([event.unit_type_name for event in cls.all()]))
+
 #Take a closer look at this
 class UnitDiedEvent(db.Model):
     __tablename__ = 'unitdiedevents'
 
     id = db.Column(db.Integer, primary_key = True)
     participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
-    #game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
-    participant = db.relationship('Participant', secondary = 'players_ude', back_populates = 'events_UDiE_participant')
-    killing_participant = db.relationship('Participant', secondary = 'players_ude', back_populates = 'events_UDiE_killing_participant')
-    #game = db.relationship('Game', back_populates = 'events_UDiE')
+
+    participant = db.relationship('Participant', back_populates = 'events_UDiE')
 
     name = db.Column(db.Text)
     second = db.Column(db.Float)
@@ -196,16 +215,15 @@ class UnitDiedEvent(db.Model):
     loc_y = db.Column(db.Float)
 
     def __repr__(self):
-        return '<' + self.name + ' (participant = ' + self.participant[0].name + ', killing_participant = ' + self.killing_participant[0].name + ') >'
+        return '<' + self.name + ' (participant = ' + self.participant.name + ') >'
 
 class UnitTypeChangeEvent(db.Model):
     __tablename__ = 'unittypechangeevents'
 
     id = db.Column(db.Integer, primary_key = True)
     participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
-    #game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
+
     participant = db.relationship('Participant', back_populates = 'events_UTCE')
-    #game = db.relationship('Game', back_populates = 'events_UTCE')
 
     name = db.Column(db.Text)
     second = db.Column(db.Float)
@@ -215,14 +233,21 @@ class UnitTypeChangeEvent(db.Model):
     def __repr__(self):
         return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
+    @classmethod
+    def all(cls):
+        return db.session.query(cls).all()
+
+    # @classmethod #Look into which one to use. Maybe a larger class 'Event which all of these classes pull from.'
+    # def get_unique_event_names(cls):
+    #     return list(set([event.unit for event in cls.all()]))
+
 class UpgradeCompleteEvent(db.Model):
     __tablename__ = 'upgradecompleteevents'
 
     id = db.Column(db.Integer, primary_key = True)
     participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
-    #game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
+
     participant = db.relationship('Participant', back_populates = 'events_UCE')
-    #game = db.relationship('Game', back_populates = 'events_UCE')
 
     name = db.Column(db.Text)
     second = db.Column(db.Float)
@@ -231,14 +256,21 @@ class UpgradeCompleteEvent(db.Model):
     def __repr__(self):
         return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
+    @classmethod
+    def all(cls):
+        return db.session.query(cls).all()
+
+    @classmethod
+    def get_unique_event_names(cls):
+        return list(set([event.upgrade_type_name for event in cls.all()]))
+
 class UnitInitEvent(db.Model):
     __tablename__ = 'unitinitevent'
 
     id = db.Column(db.Integer, primary_key = True)
     participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
-    #game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
+
     participant = db.relationship('Participant', back_populates = 'events_UIE')
-    #game = db.relationship('Game', back_populates = 'events_UIE')
 
     name = db.Column(db.Text)
     second = db.Column(db.Float)
@@ -249,14 +281,21 @@ class UnitInitEvent(db.Model):
     def __repr__(self):
         return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
+    @classmethod
+    def all(cls):
+        return db.session.query(cls).all()
+
+    @classmethod
+    def get_unique_event_names(cls):
+        return list(set([event.unit_type_name for event in cls.all()]))
+
 class UnitDoneEvent(db.Model):
     __tablename__ = 'unitdoneevent'
 
     id = db.Column(db.Integer, primary_key = True)
     participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
-    #game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
+
     participant = db.relationship('Participant', back_populates = 'events_UDE')
-    #game = db.relationship('Game', back_populates = 'events_UDE')
 
     name = db.Column(db.Text)
     second = db.Column(db.Float)
@@ -265,14 +304,21 @@ class UnitDoneEvent(db.Model):
     def __repr__(self):
         return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
+    @classmethod
+    def all(cls):
+        return db.session.query(cls).all()
+
+    @classmethod
+    def get_unique_event_names(cls):
+        return list(set([event.unit for event in cls.all()]))
+
 class BasicCommandEvent(db.Model):
     __tablename__ = 'basiccommandevent'
 
     id = db.Column(db.Integer, primary_key = True)
     participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
-    #game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
+
     participant = db.relationship('Participant', back_populates = 'events_BCE')
-    #game = db.relationship('Game', back_populates = 'events_BCE')
 
     name = db.Column(db.Text)
     second = db.Column(db.Float)
@@ -281,14 +327,21 @@ class BasicCommandEvent(db.Model):
     def __repr__(self):
         return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
+    @classmethod
+    def all(cls):
+        return db.session.query(cls).all()
+
+    @classmethod
+    def get_unique_event_names(cls):
+        return list(set([event.ability_name for event in cls.all()]))
+
 class TargetPointEvent(db.Model):
     __tablename__ = 'targetpointevent'
 
     id = db.Column(db.Integer, primary_key = True)
     participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
-    #game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
+
     participant = db.relationship('Participant', back_populates = 'events_TPE')
-    #game = db.relationship('Game', back_populates = 'events_TPE')
 
     name = db.Column(db.Text)
     second = db.Column(db.Float)
@@ -299,25 +352,25 @@ class TargetPointEvent(db.Model):
     def __repr__(self):
         return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
+    @classmethod
+    def all(cls):
+        return db.session.query(cls).all()
+
+    @classmethod
+    def get_unique_event_names(cls):
+        #Write raw SQL commands in string format to place in and out parameters.
+        return list(set([event.ability_name for event in cls.all()]))
+
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||Join
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-##Do we need these??
-
-# class Player_Games(db.Model):
-#     __tablename__ = 'players_games'
-#
-#     id = db.Column(db.Integer, primary_key = True)
-#     player_id = db.Column(db.Integer, db.ForeignKey('players.id'))
-#     game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
-#
-class Player_UDiE(db.Model):
-    __tablename__ = 'players_ude'
+class Player_Games(db.Model):
+    __tablename__ = 'players_games'
 
     id = db.Column(db.Integer, primary_key = True)
-    participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
-    unitdiedevents_id = db.Column(db.Integer, db.ForeignKey('unitdiedevents.id'))
+    player_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
+    game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
 
 db.create_all()
 
