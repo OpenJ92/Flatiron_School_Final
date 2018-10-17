@@ -719,45 +719,36 @@ if False:
             pass
             #print('replay: failed to load')
 
-def get_replays(league, numSamples = None, random = False):
+def get_replays(league, start = 0, numSamples = None, random = False):
     if random:
         return np.random.choice(np.array(['../sc2_Replays/' + league +  '/' + league + '_replays/' + link for link in os.listdir('../sc2_Replays/' + league +  '/' + league + '_replays') if '(' not in link]), numSamples)
     else:
         if numSamples != None:
             return ['../sc2_Replays/' + league +  '/' + league + '_replays/' + link for link in os.listdir('../sc2_Replays/' + league +  '/' + league + '_replays')][-1 * numSamples:]
         else:
-            return ['../sc2_Replays/' + league +  '/' + league + '_replays/' + link for link in os.listdir('../sc2_Replays/' + league +  '/' + league + '_replays')]
+            return ['../sc2_Replays/' + league +  '/' + league + '_replays/' + link for link in os.listdir('../sc2_Replays/' + league +  '/' + league + '_replays')][start:]
 
 def get_professional_replays(matchup):
     return ['../sc2_Replays/STReplays'+ matchup + '/' + file for file in os.listdir('../sc2_Replays/STReplays' + matchup)]
 
 
-#Build recursive exception function that catches broken replay files and continues running
-#on the next file in the directory.
+def construct_objects_batch(replays):
+    for replay in replays:
+        try:
+            construct_objects(replay)
+        except Exception as e:
+            #write broken filname to .txt
+            print(replay)
 
-counter = 0
-for replay in get_replays('Gold', numsamples = None, random = False):
-    try:
-        construct_objects(replay)
-        counter += 1
-    except Exception as e:
-        print(e)
-        print(counter)
+for league in ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master', 'Grand_Master']:
+    replays = get_replays(league)
+    construct_objects_batch(replays)
 
-# [construct_objects(replay) for replay in get_replays('Bronze', 2000)]
-# print('Bronze Complete____________________________________________________')
-# [construct_objects(replay) for replay in get_replays('Silver', 2000)]
-# print('Silver Complete____________________________________________________')
-# [construct_objects(replay) for replay in get_replays('Gold', 2000)]
-# print('Gold Complete____________________________________________________')
-# [construct_objects(replay) for replay in get_replays('Platinum', 2000)]
-# print('Platinum Complete____________________________________________________')
-# [construct_objects(replay) for replay in get_replays('Diamond', 2000)]
-# print('Diamond Complete____________________________________________________')
-# [construct_objects(replay) for replay in get_replays('Master', 2000)]
-# print('Master Complete____________________________________________________')
-# [construct_objects(replay) for replay in get_replays('Grand_Master', 2000)]
-# print('Grand_Master Complete____________________________________________________')
+# for league in [matchups]:
+#     replays = get_replays(league)
+#     construct_objects_batch(replays)
+
+
 # [construct_objects(replay, pro = True) for replay in get_professional_replays('TvT')]
 # print('TvT Complete____________________________________________________')
 # [construct_objects(replay, pro = True) for replay in get_professional_replays('PvT')]
