@@ -8,8 +8,6 @@ see: WebS_.py and Sc.py - lines(19 - 60)
 
 While the Starcraft 2 replay files are not found in this repository, The means by which one can retrieve them are. In these scripts, I use *BeautifulSoup*, *selenium* and *requests* among many other libraries to pull replays from https://gggreplays.com/ and https://lotv.spawningtool.com/. (See import commands at the top of each file for further details)
 
-Several interesting challenges were encountered particularly with respect to https://gggreplays.com/ where replay elements were nested in a 3 tiered structure, those being (_Search Page, Content Page, Download Link_). This required the use of selenium webdriver so that the desired elements would be loaded into the browser and be scraped.
-
 In total ~> 120,000 replay files spanning 5 years and 7 leagues, among many other metrics, were collected. For the purposes of this project A subset of replays, particularly those belonging to professional players, were used due not only for the time constraint, but due to the diverse range of player strategy displayed at that level.
 
 ## Extract Transform Load:
