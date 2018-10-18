@@ -30,18 +30,20 @@ This intermediary object (Participant) works to simplify queries and relationshi
 With the subset of replays committed to a SQLlite3 database, the raw information was then transformed into a sequential aggregate form.
 
 *ie.*
-  (game, participant, sequence, train_Marine, train_Marauder, build_Barracks, ...)
-  a_1 = (100, 4, 0, 0, 0, 0, 0, ...)
-  a_2 = (100, 4, 1, 0, 1, 0, 0, ...)
-  a_3 = (100, 4, 2, 1, 0, 0, 0, ...)
-  a_4 = (100, 4, 3, 0, 1, 0, 0, ...)
+(game, participant, sequence, train_Marine, train_Marauder, build_Barracks, ...)
+a_1 = (100, 4, 0, 0, 0, 0, 0, ...)
+a_2 = (100, 4, 1, 0, 1, 0, 0, ...)
+a_3 = (100, 4, 2, 1, 0, 0, 0, ...)
+a_4 = (100, 4, 3, 0, 1, 0, 0, ...)
 
 *into*
-  (game, participant, action, train_Marine, train_Marauder, build_Barracks, ...)
-  a_1 = (100, 4, 0, 0, 0, 0, 0, ...)
-  a_2 = (100, 4, 1, 0, 1, 0, 0, ...)
-  a_3 = (100, 4, 2, 1, 1, 0, 0, ...)
-  a_4 = (100, 4, 3, 1, 2, 0, 0, ...)
+(game, participant, action, train_Marine, train_Marauder, build_Barracks, ...)
+a_1 = (100, 4, 0, 0, 0, 0, 0, ...)
+a_2 = (100, 4, 1, 0, 1, 0, 0, ...)
+a_3 = (100, 4, 2, 1, 1, 0, 0, ...)
+a_4 = (100, 4, 3, 1, 2, 0, 0, ...)
+
+![Image of data](http://oi68.tinypic.com/2wfl0fd.jpg)
 
 to reflect the current state of the game for one of the two participants. Notice, with (game, participant, action) removed, the bulk can be considered a one dimensional curve in Rn whose rate with respect to order of action belongs to the hypercube Rn and |a_(n)| < |a_(n+m)| for all n and m belong to the Naturals.
 
