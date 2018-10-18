@@ -21,7 +21,7 @@ Using the Flask-SQLAlchemy python framework a cyclic model (_./ORM/models.py_) o
 Ultimately, this construction was a great hinderance to the project. Navigating such a graph was cumbersome at best and confusing at worst. In the light of this burden, I decided to (_post submission_) reconstruct the model in a star topology seen in the current (_./ORM/models.py_).
 
 1. (Users) have many (Participants)
-2. (Participants) have many (Games, Events) have one (User)
+2. (Participants) have many (Events) have one (Game, User)
 3. (Games) have many (Participants)
 4. (Events) have one (Participant)
 
@@ -44,13 +44,15 @@ With the subset of replays committed to a SQLlite3 database, the raw information
 4. a_4 = (100, 4, 3, 1, 2, 0, 0, ...)
 
 ![Image of data](http://oi68.tinypic.com/2wfl0fd.jpg)
-
-_figure above displays all Terran professional games (buildings constructed) notice the clear directionality of the tendrils_
+_figure above displays all Terran professional games (buildings constructed) notice the clear directionality of the tendrils._
 
 to reflect the current state of the game for one of the two participants. Notice, with (game, participant, action) removed, the bulk can be considered a one dimensional curve in Rn whose rate with respect to order of action belongs to the hypercube Rn and |a_(n)| < |a_(n+m)| for all n and m belong to the Naturals.
 
 ## Regression Singular Vector
 see: ./ORM/PCA_ETL.py
+
+![Image of data](http://oi66.tinypic.com/2cpet7r.jpg)
+_figure above displays inner product of Terran, Protoss and Zerg professional games as a measure of directional simmilarity._
 
 ## Unsupervised K-Means - Euclidian:
 see: ./ORM/unsupervised.py
@@ -58,7 +60,7 @@ see: ./ORM/unsupervised.py
 ## to-do:
 ### Unsupervised K-Means - Cosine: (in Progress)
 see: ./ORM/unsupervised_cos.py
-## Regression ARIMA coefficients / Unsupervised K-Means - Cosine, Euclidian (in Progress)
+### Regression ARIMA coefficients / Unsupervised K-Means - Cosine, Euclidian (in Progress)
 see: under construction
 ### Dense Neural Network player_state -f-> action:  (in Progress)
 see: ML.py and ML_Sc.py and TreeBot.py
