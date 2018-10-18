@@ -1,5 +1,8 @@
 #### Flatiron_School_Final
 
+## Goal:
+A study of Starcraft 2 replay data in an attempt to identify strategy exterior to expert knowledge
+
 ## Web Scrape:
 see: WebS_.py and Sc.py - lines(19 - 60)
 
@@ -48,14 +51,22 @@ _figure above displays all Terran professional games (buildings constructed) not
 
 to reflect the current state of the game for one of the two participants. Notice, with (game, participant, action) removed, the bulk can be considered a one dimensional curve in Rn whose rate with respect to order of action belongs to the hypercube Rn and |a_(n)| < |a_(n+m)| for all n and m belong to the Naturals.
 
-## Regression Singular Vector
+## Regression - Singular Vector
 see: ./ORM/PCA_ETL.py
 
+For each games sequence of events, I preformed a Principal Component Analysis reduction of dimensionally -> R1 as a means to extract the first singular vector. This, by the definition of the first singular vector [1](https://www.cs.cmu.edu/~venkatg/teaching/CStheory-infoage/book-chapter-4.pdf) (Section 1.1), vector is a regressive representation of the direction of the propagation of events of each game. This was chosen as a representation not only for its speed and interpretability, but for its ability to capture the events for each game in its totality in a single vector. There are certainly disadvantages to this approach with a loss of information (High Bias) and lack of invertibility, but it suited the project goal well enough. I intend to construct a function which measures an 'arc' residual sum as means to interpret the 'goodness of fit' of each singular vector and its corresponding aggregate game events.
+
 ![Image of data](http://oi66.tinypic.com/2cpet7r.jpg)
-_figure above displays inner product of Terran, Protoss and Zerg professional games as a measure of directional simmilarity._
+_figure above displays inner product of Terran, Protoss and Zerg professional games as a measure of directional simmilarity. Notice that there are regions of orthogonal singular vectors reflecting different race units and structures._
 
 ## Unsupervised K-Means - Euclidian:
 see: ./ORM/unsupervised.py
+
+Equipped with our singular vector representation for each game's events, I carried out unsupervised KMeans, with a Euclidian metric and GaussianMixture clustering on these singular vectors. With this algorithm, we were attempting to identify a collection of naturally occurring strategies in the game of Starcraft. I intend on trying several additional methods including a cosine similarity metric, which I believe will parse the singular vectors best according to an adjusted silhouette score metric.  
+
+## Conclusion:
+
+Currently, the only clear assertion I can make is that I will continue to work on this project. Below is a collection of goals in a to-do list for the coming weeks. I did not achieve what I sought out to do in the problem statement of the project, but I am confident that with diligent work I will be able to.
 
 ## to-do:
 ### Unsupervised K-Means - Cosine: (in Progress)
