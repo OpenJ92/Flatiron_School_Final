@@ -9,20 +9,6 @@
 ### on each game. Use first principle component to carry out classificationself.
 ### Show that with 3 classes, one should find individual races.
 
-##############FAILED EXPERIMENT
-##############FAILED EXPERIMENT
-##############FAILED EXPERIMENT
-##############FAILED EXPERIMENT
-##############FAILED EXPERIMENT
-##############FAILED EXPERIMENT
-##############FAILED EXPERIMENT
-##############FAILED EXPERIMENT
-##############FAILED EXPERIMENT
-##############FAILED EXPERIMENT
-##############FAILED EXPERIMENT
-##############FAILED EXPERIMENT
-##############FAILED EXPERIMENT
-
 print('enter PCA')
 
 from routes import *
@@ -67,6 +53,13 @@ def event_Dictionary():
             'BCE': {'Terran': BCE_t,'Zerg': BCE_z,'Protoss': BCE_p, 'event_column': 'ability_name'},
             'drop_add': ['participant_id', 'second']}
 
+def unique_event_names():
+    event_dictionary_ = event_Dictionary()
+    return {'UBE': event_dictionary_['UBE']['Terran'] + event_dictionary_['UBE']['Zerg'] + event_dictionary_['UBE']['Protoss'],
+            'TPE': event_dictionary_['TPE']['Terran'] + event_dictionary_['TPE']['Zerg'] + event_dictionary_['TPE']['Protoss'],
+            'UDE': event_dictionary_['UDE']['Terran'] + event_dictionary_['UDE']['Zerg'] + event_dictionary_['UDE']['Protoss'],
+            'BCE': event_dictionary_['BCE']['Terran'] + event_dictionary_['BCE']['Zerg'] + event_dictionary_['BCE']['Protoss']}
+
 def aggregate_cumulative_events(df_drop_add, df_dummy):
     df_dummy = df_dummy.cumsum()
     return pd.concat([df_dummy, df_drop_add], axis = 1, sort = False)
@@ -91,7 +84,6 @@ def _df_UnitsStructures(participant, event_name, time = False):
         return None
 
     df_event_gd = pd.get_dummies(df_event[event_Dictionary_[event_name]['event_column']])
-    #import pdb; pdb.set_trace()
     df_event_gd_filter = df_event_gd[[col for col in df_event_gd.columns if col in event_Dictionary_[event_name][participant.playrace]]]
     df_event_gd_agg = aggregate_cumulative_events(df_event[event_Dictionary_['drop_add']], df_event_gd_filter)
 
@@ -99,8 +91,23 @@ def _df_UnitsStructures(participant, event_name, time = False):
         df_event_gd_agg = aggregate_cumulative_time_events(df_event_gd_agg)
 
     df_event_gd_agg = df_event_gd_agg[~df_event_gd_agg['second'].duplicated(keep='last')]
-
     return df_event_gd_agg, participant_game_id, participant.id, participant.user[0].id
+
+def construct_full_UnitsStructures_df_PCA(participant, event_name, time = False):
+    participant_df_UnitsStructures = _df_UnitsStructures(participant, event_name, time = time)
+    full_col = unique_event_names()[event_name]
+    full_DataFrame = pd.DataFrame(columns = full_col)
+    return pd.concat([participant_df_UnitsStructures[0], full_DataFrame], axis = 0, sort = False).fillna(0)[full_col + ['second', 'participant_id']]
+
+def fit_construct_PCAoTSVD(participant, event_name, n_components, time = False, func_decomp = PCA, func_normalization = MinMaxScaler, name_decomp = 'PCA', name_normalization = 'PCA'):
+    construct_full_UnitsStructures_df_PCA_ = construct_full_UnitsStructures_df_PCA(participant, event_name, time).drop(columns = ['second', 'participant_id'])
+    decomposition_analysis = func_decomp(n_components)
+    normalization_scalar = func_normalization()
+    construct_full_UnitsStructures_df_PCA_mm = normalization_scalar.fit_transform(construct_full_UnitsStructures_df_PCA_)
+    decomposition_analysis.fit(construct_full_UnitsStructures_df_PCA_mm)
+    None if os.path.exists(name_decomp + '_' + name_normalization + '_Models/') else os.mkdir(name_decomp + '_' + name_normalization + '_Models/')
+    joblib.dump(decomposition_analysis, name_decomp + '_' + name_normalization + '_Models/' + event_name + str(participant.id) + '_' + str(participant.user.id) + '_' + str(participant.game[0].id) + '.joblib')
+
 
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #||||||||||||||||||||||||||||||||||||||DataFrame Construction||Feature Selection
