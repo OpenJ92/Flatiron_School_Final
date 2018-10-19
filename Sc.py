@@ -16,7 +16,7 @@ offline.init_notebook_mode()
 
 
 
-if False: #Get replay files from ST.
+if True: #Get replay files from ST.
     _link_PvT = 'https://lotv.spawningtool.com/replays/?pro_only=on&query=&after_played_on=&before_played_on=&after_time=&order_by=&before_time=&tag=10&tag=1&coop=n&patch=130&p='
     ST_PvT_Requests = [requests.get(_link_PvT + str(link_)) for link_ in range(1, 22)]
     ST_PvT_BeautifulSoup = [BeautifulSoup(request.text) for request in ST_PvT_Requests]

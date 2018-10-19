@@ -387,9 +387,6 @@ def construct_objects(replay_file, pro = False):
         #print(e)
         #print('replay: failed to load')
 
-
-
-
 if False:
     def construct_objects_v0(replay_file, pro = False):
         try:
@@ -728,36 +725,20 @@ def get_replays(league, start = 0, numSamples = None, random = False):
         else:
             return ['../sc2_Replays/' + league +  '/' + league + '_replays/' + link for link in os.listdir('../sc2_Replays/' + league +  '/' + league + '_replays')][start:]
 
-def get_professional_replays(matchup):
-    return ['../sc2_Replays/STReplays'+ matchup + '/' + file for file in os.listdir('../sc2_Replays/STReplays' + matchup)]
+def get_professional_replays():
+    return ['../sc2_Replays/STReplays/' + file for file in os.listdir('../sc2_Replays/STReplays')]
 
 
-def construct_objects_batch(replays):
+def construct_objects_batch(replays, pro):
     for replay in replays:
         try:
-            construct_objects(replay)
+            construct_objects(replay, pro = pro)
         except Exception as e:
             #write broken filname to .txt
             print(replay)
 
-for league in ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master', 'Grand_Master']:
-    replays = get_replays(league)
-    construct_objects_batch(replays)
-
-# for league in [matchups]:
+# for league in ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master', 'Grand_Master']:
 #     replays = get_replays(league)
-#     construct_objects_batch(replays)
+#     construct_objects_batch(replays, pro = False)
 
-
-# [construct_objects(replay, pro = True) for replay in get_professional_replays('TvT')]
-# print('TvT Complete____________________________________________________')
-# [construct_objects(replay, pro = True) for replay in get_professional_replays('PvT')]
-# print('PvT Complete____________________________________________________')
-# [construct_objects(replay, pro = True) for replay in get_professional_replays('ZvT')]
-# print('ZvT Complete____________________________________________________')
-# [construct_objects(replay, pro = True) for replay in get_professional_replays('PvP')]
-# print('PvP Complete____________________________________________________')
-# [construct_objects(replay, pro = True) for replay in get_professional_replays('ZvP')]
-# print('ZvP Complete____________________________________________________')
-# [construct_objects(replay, pro = True) for replay in get_professional_replays('ZvZ')]
-# print('ZvZ Complete____________________________________________________')
+construct_objects_batch(get_professional_replays(), pro = True)
