@@ -65,7 +65,7 @@ def event_Dictionary():
             'TPE': {'Terran': TPE_t,'Zerg': TPE_z,'Protoss': TPE_p, 'event_column': 'ability_name'},
             'UDE': {'Terran': UDE_t,'Zerg': UDE_z,'Protoss': UDE_p, 'event_column': 'unit'},
             'BCE': {'Terran': BCE_t,'Zerg': BCE_z,'Protoss': BCE_p, 'event_column': 'ability_name'},
-            'drop_add': ['game_id', 'player_id', 'second']}
+            'drop_add': ['participant_id', 'second']}
 
 def aggregate_cumulative_events(df_drop_add, df_dummy):
     df_dummy = df_dummy.cumsum()
@@ -74,27 +74,33 @@ def aggregate_cumulative_events(df_drop_add, df_dummy):
 def aggregate_cumulative_time_events(aggregate_cumulative_events):
     min_ = aggregate_cumulative_events['second'].min()
     max_ = aggregate_cumulative_events['second'].max()
-    second_ = list(range(min_, max_))
+    second_ = list(range(int(min_), int(max_)))
     second_df = pd.DataFrame(second_, columns = ['second'])
-    #You're working on this currently.
+    #import pdb; pdb.set_trace()
+    ACTE = pd.merge(aggregate_cumulative_events, second_df, how = 'right', on = 'second').sort_values(by = ['second']).ffill()
+    return ACTE[~ACTE['second'].duplicated(keep='last')]
 
-def _df_UnitsStructures(participant, event_name, event_method, time = False):
-    participant_events = participant.event_method
-    participant_game_id = participant.game.id
-    event_Dictionary = event_Dictionary()
+def _df_UnitsStructures(participant, event_name, time = False):
+    participant_events = participant.events_(event_name)
+    participant_game_id = participant.game[0].id
+    event_Dictionary_ = event_Dictionary()
 
     try:
         df_event = pd.DataFrame([vars(event) for event in participant_events]).sort_values(by = ['second'])
     except:
         return None
 
-    df_event_gd = pd.get_dummies(df_event[event_Dictionary[event_name]['event_column']])[event_Dictionary[event_name][participant.playrace]]
-    df_event_gd_agg = aggregate_cumulative_events(df_event[event_Dictionary['drop_add']], df_event_gd)
+    df_event_gd = pd.get_dummies(df_event[event_Dictionary_[event_name]['event_column']])
+    #import pdb; pdb.set_trace()
+    df_event_gd_filter = df_event_gd[[col for col in df_event_gd.columns if col in event_Dictionary_[event_name][participant.playrace]]]
+    df_event_gd_agg = aggregate_cumulative_events(df_event[event_Dictionary_['drop_add']], df_event_gd_filter)
 
     if time:
         df_event_gd_agg = aggregate_cumulative_time_events(df_event_gd_agg)
 
-    return df_event_gd_agg, participant_game_id, participant.id
+    df_event_gd_agg = df_event_gd_agg[~df_event_gd_agg['second'].duplicated(keep='last')]
+
+    return df_event_gd_agg, participant_game_id, participant.id, participant.user[0].id
 
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #||||||||||||||||||||||||||||||||||||||DataFrame Construction||Feature Selection

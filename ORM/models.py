@@ -13,7 +13,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
 
-    participants = db.relationship('Participant', back_populates = 'user')
+    participants = db.relationship('Participant', secondary = 'participants_users', back_populates = 'user')
 
     name = db.Column(db.Text)
     region = db.Column(db.Text)
@@ -37,8 +37,8 @@ class Participant(db.Model):
     #game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
     #user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    game = db.relationship('Game', secondary = 'players_games', back_populates = 'participants')
-    user = db.relationship('User', back_populates = 'participants')
+    game = db.relationship('Game', secondary = 'participants_games', back_populates = 'participants')
+    user = db.relationship('User', secondary = 'participants_users', back_populates = 'participants')
 
     name = db.Column(db.Text)
     league = db.Column(db.Text)
@@ -71,6 +71,28 @@ class Participant(db.Model):
     def all(cls):
         return db.session.query(cls).all()
 
+    def events_(self, event):
+        if event == 'PSE':
+            return self.events_PSE
+        elif event == 'UBE':
+            return self.events_UBE
+        elif event == 'UTCE':
+            return self.events_UTCE
+        elif event == 'UCE':
+            return self.events_UCE
+        elif event == 'UIE':
+            return self.events_UIE
+        elif event == 'UDE':
+            return self.events_UDE
+        elif event == 'BCE':
+            return self.events_BCE
+        elif event == 'TPE':
+            return self.events_TPE
+        elif event == 'UDiE':
+            return self.events_UDiE
+        else:
+            return None
+
     # def construct dataframe per event type
 
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -83,7 +105,7 @@ class Game(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
 
-    participants = db.relationship('Participant', secondary = 'players_games', back_populates = 'game')
+    participants = db.relationship('Participant', secondary = 'participants_games', back_populates = 'game')
 
     name = db.Column(db.Text)
     map = db.Column(db.Text)
@@ -365,12 +387,19 @@ class TargetPointEvent(db.Model):
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||Join
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-class Player_Games(db.Model):
-    __tablename__ = 'players_games'
+class Participants_Games(db.Model):
+    __tablename__ = 'participants_games'
 
     id = db.Column(db.Integer, primary_key = True)
     player_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
     game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
+
+class Participants_Users(db.Model):
+    __tablename__ = 'participants_users'
+
+    id = db.Column(db.Integer, primary_key = True)
+    player_id = db.Column(db.Integer, db.ForeignKey('participants.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
 db.create_all()
 

@@ -737,8 +737,11 @@ def construct_objects_batch(replays, pro):
             #write broken filname to .txt
             print(replay)
 
-# for league in ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master', 'Grand_Master']:
-#     replays = get_replays(league)
-#     construct_objects_batch(replays, pro = False)
+#['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master', 'Grand_Master']
+
+for league in ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master']:
+    print(league)
+    replays = get_replays(league)
+    construct_objects_batch(replays, pro = False)
 
 construct_objects_batch(get_professional_replays(), pro = True)
