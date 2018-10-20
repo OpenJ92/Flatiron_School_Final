@@ -34,9 +34,6 @@ class Participant(db.Model):
     __tablename__ = 'participants'
 
     id = db.Column(db.Integer, primary_key = True)
-    #game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
-    #user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-
     game = db.relationship('Game', secondary = 'participants_games', back_populates = 'participants')
     user = db.relationship('User', secondary = 'participants_users', back_populates = 'participants')
 
@@ -92,8 +89,6 @@ class Participant(db.Model):
             return self.events_UDiE
         else:
             return None
-
-    # def construct dataframe per event type
 
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||Game
@@ -216,10 +211,6 @@ class UnitBornEvent(db.Model):
     def all(cls):
         return db.session.query(cls).all()
 
-    @classmethod
-    def get_unique_event_names(cls):
-        return list(set([event.unit_type_name for event in cls.all()]))
-
 #Take a closer look at this
 class UnitDiedEvent(db.Model):
     __tablename__ = 'unitdiedevents'
@@ -259,10 +250,6 @@ class UnitTypeChangeEvent(db.Model):
     def all(cls):
         return db.session.query(cls).all()
 
-    # @classmethod #Look into which one to use. Maybe a larger class 'Event which all of these classes pull from.'
-    # def get_unique_event_names(cls):
-    #     return list(set([event.unit for event in cls.all()]))
-
 class UpgradeCompleteEvent(db.Model):
     __tablename__ = 'upgradecompleteevents'
 
@@ -281,10 +268,6 @@ class UpgradeCompleteEvent(db.Model):
     @classmethod
     def all(cls):
         return db.session.query(cls).all()
-
-    @classmethod
-    def get_unique_event_names(cls):
-        return list(set([event.upgrade_type_name for event in cls.all()]))
 
 class UnitInitEvent(db.Model):
     __tablename__ = 'unitinitevent'
@@ -307,10 +290,6 @@ class UnitInitEvent(db.Model):
     def all(cls):
         return db.session.query(cls).all()
 
-    @classmethod
-    def get_unique_event_names(cls):
-        return list(set([event.unit_type_name for event in cls.all()]))
-
 class UnitDoneEvent(db.Model):
     __tablename__ = 'unitdoneevent'
 
@@ -330,10 +309,6 @@ class UnitDoneEvent(db.Model):
     def all(cls):
         return db.session.query(cls).all()
 
-    @classmethod
-    def get_unique_event_names(cls):
-        return list(set([event.unit for event in cls.all()]))
-
 class BasicCommandEvent(db.Model):
     __tablename__ = 'basiccommandevent'
 
@@ -352,10 +327,6 @@ class BasicCommandEvent(db.Model):
     @classmethod
     def all(cls):
         return db.session.query(cls).all()
-
-    @classmethod
-    def get_unique_event_names(cls):
-        return list(set([event.ability_name for event in cls.all()]))
 
 class TargetPointEvent(db.Model):
     __tablename__ = 'targetpointevent'
@@ -377,11 +348,6 @@ class TargetPointEvent(db.Model):
     @classmethod
     def all(cls):
         return db.session.query(cls).all()
-
-    @classmethod
-    def get_unique_event_names(cls):
-        #Write raw SQL commands in string format to place in and out parameters.
-        return list(set([event.ability_name for event in cls.all()]))
 
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||Join

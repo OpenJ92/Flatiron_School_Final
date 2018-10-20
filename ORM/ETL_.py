@@ -48,6 +48,7 @@ def construct_objects(replay_file, pro = False):
         game = db.session.query(Game).filter_by(name = str(replay.date) + '_' + replay.players[0].play_race + ' v ' + replay.players[1].play_race + '_' + replay.players[0].name + ' v ' + replay.players[1].name).first()
 
         if game != None:
+            #print('Game already exists: ', game)
             return None
 
         game = Game(name = str(replay.date) + '_' + replay.players[0].play_race + ' v ' + replay.players[1].play_race + '_' + replay.players[0].name + ' v ' + replay.players[1].name,
@@ -405,12 +406,11 @@ def construct_objects_batch(replays, pro):
         try:
             construct_objects(replay, pro = pro)
         except Exception as e:
-            #write broken filname to .txt
             print(replay)
 
-#['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master', 'Grand_Master']
+# 'Bronze', 'Silver', 'Gold',
 
-for league in ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master']:
+for league in ['Platinum', 'Diamond', 'Master', 'Grand_Master']:
     print(league)
     replays = get_replays(league)
     construct_objects_batch(replays, pro = False)
