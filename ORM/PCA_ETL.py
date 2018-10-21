@@ -65,7 +65,7 @@ def explore_r4(x,y,z,u,name):
     traces = go.Scatter3d(x = np.array(x), y = np.array(y), z = np.array(z), mode='markers', marker=dict(size = 3, color = u, colorscale = 'Jet', opacity = 0))
     #Label axes etc etc....
     fig = go.Figure(data=[traces])
-    offline.plot(fig, filename = 'plotly_files/' + name + '.html', auto_open=False)
+    offline.plot(fig, filename = 'plotly_files/' + name + '.html', auto_open=True)
     return None
 
 def aggregate_cumulative_events(df_drop_add, df_dummy):
@@ -153,12 +153,6 @@ def load_Decomposition_batch_FSV(sql_func, name_decomp, name_normalization, even
     singular_vector_decomposition_DataFrame = pd.concat(singular_vector_decomposition, axis = 0, columns = unique_event_names()[event_name], sort = False).T
     return singular_vector_decomposition_DataFrame
 
-def plot_(DataFrame, name):
-    #For use with load_Decomposition_batch_FSV, construct/combine_full_UnitsStructures_df, construct/combine_df_UnitsStructures
-    principle_component_analysis = PCA(n_components = 4)
-    X = principle_component_analysis.fit_transform(DataFrame)
-    explore_r4(X[:0], X[:1], X[:2], X[:3], name)
-
 def radial_RSS(participant, name_decomp, name_normalization, event_name):
     singular_vector = load_Decomposition_FSV(participant, name_decomp, name_normalization, event_name)
     singular_vector = -1*singular_vector if ((singular_vector @ np.ones_like(singular_vector)) < 0) else singular_vector
@@ -166,7 +160,7 @@ def radial_RSS(participant, name_decomp, name_normalization, event_name):
     inner_product = (event_df @ singular_vector) * event_df.apply(np.linalg.norm, axis = 0)
     return inner_product
 
-def itterated_radial_RSS(participant, name_decomp, name_normalization, event_name):
+def cummalative_radial_RSS(participant, name_decomp, name_normalization, event_name):
     inner_product = radial_RSS(participant, name_decomp, name_normalization, event_name)
     inner_product_ = inner_product * inner_product
     inner_product_cummalative = inner_product_.cumsum()
@@ -175,5 +169,18 @@ def itterated_radial_RSS(participant, name_decomp, name_normalization, event_nam
 def full_radial_RSS(participant, name_decomp, name_normalization, event_name):
     inner_product = radial_RSS(participant, name_decomp, name_normalization, event_name)
     return (inner_product) @ (inner_product).T
+
+def plot_(DataFrame, name):
+    #For use with load_Decomposition_batch_FSV,
+    #             construct/combine_full_UnitsStructures_df,
+    #             construct/combine_df_UnitsStructures
+    DataFrame = DataFrame.drop(columns = ['second', 'participant_id'])
+    principle_component_analysis = PCA(n_components = 4)
+    min_max = MinMaxScaler()
+    DataFrame = min_max.fit_transform(DataFrame)
+    X = principle_component_analysis.fit_transform(DataFrame)
+    import pdb; pdb.set_trace()
+    explore_r4(X[:,0], X[:,1], X[:,2], X[:,3], name)
+    #look to integrate plot funcion with DASH app
 
 print('exit PCA')
