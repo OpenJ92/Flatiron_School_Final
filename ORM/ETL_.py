@@ -408,9 +408,9 @@ def construct_objects_batch(replays, pro):
         except Exception as e:
             print(replay)
 
-# 'Bronze', 'Silver', 'Gold',
+# 'Bronze', 'Silver', 'Gold', 'Platinum'
 
-for league in ['Platinum', 'Diamond', 'Master', 'Grand_Master']:
+for league in ['Diamond', 'Master', 'Grand_Master']:
     print(league)
     replays = get_replays(league)
     construct_objects_batch(replays, pro = False)

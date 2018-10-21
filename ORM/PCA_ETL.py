@@ -129,10 +129,10 @@ def fit_construct_PCAoTSVD(participant, event_name, time = False, func_decomp = 
                 str(participant.game[0].id) + '_' + participant.league +'.joblib')
 
 def pipeline(event_name, time = True, func_decomp = PCA, func_normalization = MinMaxScaler, name_decomp = 'PCA', name_normalization = 'MinMax'):
-    participants = db.session.query(Participant)[:100]
+    participants = [db.session.query(Participant).first()]
     [fit_construct_PCAoTSVD(participant, event_name, time, func_decomp, func_normalization, name_decomp, name_normalization) for participant in participants]
 
-# ?Move to unsupervised.py
+# ?Move to unsupervised.py UNTESTED
 
 def load_Decomposition(participant, name_decomp, name_normalization, event_name):
     decomposition_load = joblib.load(name_decomp + '_' + name_normalization + '_Models/' + event_name + '_' +
@@ -149,7 +149,7 @@ def load_Decomposiation_batch(sql_func, name_decomp, name_normalization, event_n
 
 def load_Decomposition_batch_FSV(sql_func, name_decomp, name_normalization, event_name):
     participants = sql_func()
-    singular_vector_decomposition = [load_Decomposition_FSV(participant, name_decomp, name_normalization, event_name)for participant in participants]
+    singular_vector_decomposition = [load_Decomposition_FSV(participant, name_decomp, name_normalization, event_name) for participant in participants]
     singular_vector_decomposition_DataFrame = pd.concat(singular_vector_decomposition, axis = 0, columns = unique_event_names()[event_name], sort = False).T
     return singular_vector_decomposition_DataFrame
 
@@ -159,9 +159,21 @@ def plot_(DataFrame, name):
     X = principle_component_analysis.fit_transform(DataFrame)
     explore_r4(X[:0], X[:1], X[:2], X[:3], name)
 
-def radial_RSS(participant):
+def radial_RSS(participant, name_decomp, name_normalization, event_name):
     singular_vector = load_Decomposition_FSV(participant, name_decomp, name_normalization, event_name)
+    singular_vector = -1*singular_vector if ((singular_vector @ np.ones_like(singular_vector)) < 0) else singular_vector
     event_df = construct_full_UnitsStructures_df(participant, event_name, time = False)
-    sum((event_df @ len(event_df[i])singular_vector) / len(event_df[i])**2) ??
+    inner_product = (event_df @ singular_vector) * event_df.apply(np.linalg.norm, axis = 0)
+    return inner_product
+
+def itterated_radial_RSS(participant, name_decomp, name_normalization, event_name):
+    inner_product = radial_RSS(participant, name_decomp, name_normalization, event_name)
+    inner_product_ = inner_product * inner_product
+    inner_product_cummalative = inner_product_.cumsum()
+    return inner_product_cummalative
+
+def full_radial_RSS(participant, name_decomp, name_normalization, event_name):
+    inner_product = radial_RSS(participant, name_decomp, name_normalization, event_name)
+    return (inner_product) @ (inner_product).T
 
 print('exit PCA')
