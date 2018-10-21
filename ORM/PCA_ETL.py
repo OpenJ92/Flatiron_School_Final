@@ -118,7 +118,7 @@ def combine_full_df_UnitStructures(participant, list_event_name):
 
 def fit_construct_PCAoTSVD(participant, event_name, time = False, func_decomp = PCA, func_normalization = MinMaxScaler, name_decomp = 'PCA', name_normalization = 'MinMax'):
     construct_full_UnitsStructures_df_ = construct_full_UnitsStructures_df(participant, event_name, time).drop(columns = ['second', 'participant_id'])
-    decomposition_analysis = func_decomp()
+    decomposition_analysis = func_decomp(random_state = 20)
     normalization_scalar = func_normalization()
     construct_full_UnitsStructures_df_mm = normalization_scalar.fit_transform(construct_full_UnitsStructures_df_)
     decomposition_analysis.fit(construct_full_UnitsStructures_df_mm)
@@ -128,8 +128,8 @@ def fit_construct_PCAoTSVD(participant, event_name, time = False, func_decomp = 
                 str(participant.id) + '_' + str(participant.user[0].id) + '_' + participant.playrace + '_' +
                 str(participant.game[0].id) + '_' + participant.league +'.joblib')
 
-def pipeline(event_name, time = True, func_decomp = PCA, func_normalization = MinMaxScaler, name_decomp = 'PCA', name_normalization = 'MinMax'):
-    participants = [db.session.query(Participant).first()]
+def pipeline(sql_func, event_name, time = True, func_decomp = PCA, func_normalization = MinMaxScaler, name_decomp = 'PCA', name_normalization = 'MinMax'):
+    participants = sql_func()
     [fit_construct_PCAoTSVD(participant, event_name, time, func_decomp, func_normalization, name_decomp, name_normalization) for participant in participants]
 
 # ?Move to unsupervised.py UNTESTED
@@ -182,5 +182,11 @@ def plot_(DataFrame, name):
     import pdb; pdb.set_trace()
     explore_r4(X[:,0], X[:,1], X[:,2], X[:,3], name)
     #look to integrate plot funcion with DASH app
+
+#Goal for Sunday:
+#   - plot participant data alongside shell * singular_vector
+#   - plot RSS by shell, and display full RSS.
+#   - write new SQL routes in sqlalchemy and raw_SQL
+#   - look to begin constructing singular vectors for a subset of participants.
 
 print('exit PCA')
