@@ -211,7 +211,7 @@ def plot_shell_df(participant, name_decomp, name_normalization, event_name, name
 # think about placing PCA into if plot. Return full dataframe instead of the projection of data. ____
 
 def multiplot_shell_df(sqlfunc, name_decomp, name_normalization, event_name, name):
-    participants = sqlfunc[:100]
+    participants = sqlfunc[:20]
     #import pdb; pdb.set_trace()
     collect_data = [plot_shell_df(participant, name_decomp, name_normalization, event_name, name, plot = False) for participant in participants]
     concat_data = pd.concat(collect_data, sort = False)
