@@ -14,6 +14,8 @@ import plotly.graph_objs as go
 from plotly import tools
 offline.init_notebook_mode()
 
+# GOAL FOR MONDAY -- Begin to rewrite file for new schema
+
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #||||||||||||||||||||||||||||||||||||||||||||Unsupervised Kmeans/GaussianMixture
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||

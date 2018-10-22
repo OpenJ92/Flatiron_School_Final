@@ -172,8 +172,7 @@ def radial_RSS(participant, name_decomp, name_normalization, event_name):
     event_df = construct_full_UnitsStructures_df(participant, event_name, time = True).drop(columns = ['second', 'participant_id'])
     min_max = MinMaxScaler()
     event_df_mm = min_max.fit_transform(event_df)
-    inner_product = np.inverse_cosine(event_df_mm @ singular_vector) * (1 / event_df.apply(np.linalg.norm, axis = 1)) * event_df.apply(np.linalg.norm, axis = 1)
-    ###Division by zero **
+    inner_product = np.arccos((event_df_mm @ singular_vector) * (1 / event_df.apply(np.linalg.norm, axis = 1))) * event_df.apply(np.linalg.norm, axis = 1)
     return event_df.apply(np.linalg.norm, axis = 1), inner_product
 
 def cummalative_radial_RSS(participant, name_decomp, name_normalization, event_name):
@@ -233,6 +232,7 @@ def multiplot_shell_df(sqlfunc, name_decomp, name_normalization, event_name, nam
     traces = [go.Scatter3d(x = projected_data[:,0],y = projected_data[:,1],z = projected_data[:,2], mode='markers', marker = dict(size=3))]
     fig = go.Figure(data=traces)
     offline.plot(fig, filename = 'plotly_files/' + name + '.html', auto_open=True)
+
 
 #Goal for Sunday:
 #   - plot participant data alongside shell * singular_vector -- Done -- double check.

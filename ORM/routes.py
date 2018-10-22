@@ -13,6 +13,44 @@ print('enter routes.py')
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
+def participant_Name(name):
+    return db.session.query(Participant).filter(Participant.name == name).all()
+
+def participant_Playrace(playrace, sample_size):
+    # generate a random sample from query.
+    return db.session.query(Participant).filter(Participant.playrace == playrace).all()
+
+def participant_scaledRating(lowerBound, upperBound):
+    return db.session.query(Participant).filter((Participant.scaled_rating >= lowerBound)&(Participant.scaled_rating <= upperBound)).all()
+
+def participant_league(league):
+    return db.session.query(Participant).filter(Participant.league == league).all()
+
+def participant_winner(winner):
+    # generate a random sample from query.
+    return db.session.query(Participant).filter(Participant.winner == winner).all()
+
+def participant_winner_playrace(winner, playrace):
+    return db.session.query(Participant).filter((Participant.winner == winner)&(Participant.playrace == playrace))
+
+def participants_via_users(name):
+    user = db.session.query(User).filter(User.name == name).first()
+    return [participant for participant in user.participants]
+
+def game_Map(map):
+    # generate a random sample from query.
+    return db.session.query(Game).filter(Game.map == map).all()
+
+def game_Time(upperBound, lowerBound):
+    #Note: upper and lower bound are in units of seconds.
+    return db.session.query(Game).filter((Game.end_time - Game.start_time > lowerBound)&(Game.end_time - Game.start_time < upperBound))
+def game_Expansion(expansion):
+    # generate a random sample from query.
+    return db.session.query(Game).filter(Game.expansion == expansion).all()
+
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 def query():
     return db.session.query(Game)
