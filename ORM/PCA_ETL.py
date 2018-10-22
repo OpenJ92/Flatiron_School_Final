@@ -61,8 +61,8 @@ def unique_event_names():
             'UDE': event_dictionary_['UDE']['Terran'] + event_dictionary_['UDE']['Zerg'] + event_dictionary_['UDE']['Protoss'],
             'BCE': event_dictionary_['BCE']['Terran'] + event_dictionary_['BCE']['Zerg'] + event_dictionary_['BCE']['Protoss']}
 
-def explore_r4(x,y,z,u,name):
-    traces = go.Scatter3d(x = np.array(x), y = np.array(y), z = np.array(z), mode='markers', marker=dict(size = 3, color = u, colorscale = 'Jet', opacity = 0))
+def explore_r3(x,y,z,name):
+    traces = go.Scatter3d(x = np.array(x), y = np.array(y), z = np.array(z), mode='markers', marker = dict(size=3))
     #Label axes etc etc....
     fig = go.Figure(data=[traces])
     offline.plot(fig, filename = 'plotly_files/' + name + '.html', auto_open=True)
@@ -115,6 +115,7 @@ def combine_full_df_UnitStructures(participant, list_event_name):
     _df_ = [construct_full_UnitsStructures_df(participant, event, time = True) for event in list_event_name]
     f = lambda x,y: pd.merge(x,y,right_on = 'second')
     #ittertools reduce to merge these functions. return as a DataFrame
+    ###### INCOMPLETE FUNCTION
 
 def fit_construct_PCAoTSVD(participant, event_name, time = False, func_decomp = PCA, func_normalization = MinMaxScaler, name_decomp = 'PCA', name_normalization = 'MinMax'):
     construct_full_UnitsStructures_df_ = construct_full_UnitsStructures_df(participant, event_name, time).drop(columns = ['second', 'participant_id'])
@@ -156,37 +157,79 @@ def load_Decomposition_batch_FSV(sql_func, name_decomp, name_normalization, even
 def radial_RSS(participant, name_decomp, name_normalization, event_name):
     singular_vector = load_Decomposition_FSV(participant, name_decomp, name_normalization, event_name)
     singular_vector = -1*singular_vector if ((singular_vector @ np.ones_like(singular_vector)) < 0) else singular_vector
-    event_df = construct_full_UnitsStructures_df(participant, event_name, time = False)
-    inner_product = (event_df @ singular_vector) * event_df.apply(np.linalg.norm, axis = 0)
-    return inner_product
+    event_df = construct_full_UnitsStructures_df(participant, event_name, time = True).drop(columns = ['second', 'participant_id'])
+    min_max = MinMaxScaler()
+    event_df_mm = min_max.fit_transform(event_df)
+    inner_product = (event_df_mm @ singular_vector) * (1 / event_df.apply(np.linalg.norm, axis = 1))
+    ###Division by zero **
+    return event_df.apply(np.linalg.norm, axis = 1), inner_product
 
 def cummalative_radial_RSS(participant, name_decomp, name_normalization, event_name):
-    inner_product = radial_RSS(participant, name_decomp, name_normalization, event_name)
+    # look at this function closer. The elements should be ordered by np.linalg.norm then cumal sum
+    inner_product = radial_RSS(participant, name_decomp, name_normalization, event_name)[1]
     inner_product_ = inner_product * inner_product
     inner_product_cummalative = inner_product_.cumsum()
     return inner_product_cummalative
 
 def full_radial_RSS(participant, name_decomp, name_normalization, event_name):
     inner_product = radial_RSS(participant, name_decomp, name_normalization, event_name)
-    return (inner_product) @ (inner_product).T
+    return (inner_product[1]) @ (inner_product[1]).T
+
+def plot_radial_RSS(participant, name_decomp, name_normalization, event_name):
+    # for use with radial_RSS and cummalative_radial_RSS
+    X, y = radial_RSS(participant, name_decomp, name_normalization, event_name)
+    plt.scatter(X,y)
+    plt.show()
 
 def plot_(DataFrame, name):
     #For use with load_Decomposition_batch_FSV,
     #             construct/combine_full_UnitsStructures_df,
     #             construct/combine_df_UnitsStructures
     DataFrame = DataFrame.drop(columns = ['second', 'participant_id'])
-    principle_component_analysis = PCA(n_components = 4)
+    principle_component_analysis = PCA(n_components = 3)
     min_max = MinMaxScaler()
     DataFrame = min_max.fit_transform(DataFrame)
     X = principle_component_analysis.fit_transform(DataFrame)
-    import pdb; pdb.set_trace()
-    explore_r4(X[:,0], X[:,1], X[:,2], X[:,3], name)
+    explore_r3(X[:,0], X[:,1], X[:,2], name)
     #look to integrate plot funcion with DASH app
 
+def plot_shell_df(participant, name_decomp, name_normalization, event_name, name, plot = True):
+    FSV = load_Decomposition_FSV(participant, name_decomp, name_normalization, event_name)
+    FSV = FSV if (FSV @ np.ones_like(FSV) > 0) else -1*FSV
+    FSV_df = pd.DataFrame([i*FSV for i in np.linspace(0,2,500)], columns = unique_event_names()[event_name])
+    #import pdb; pdb.set_trace()
+    UnitStructures = construct_full_UnitsStructures_df(participant, event_name, time = True).drop(columns = ['second', 'participant_id'])
+    min_max = MinMaxScaler()
+    UnitStructures_ = pd.DataFrame(min_max.fit_transform(UnitStructures), columns = unique_event_names()[event_name])
+    FSV_UnitStructures_df = pd.concat([UnitStructures_, FSV_df], sort = False)
+    if plot:
+        principle_component_analysis = PCA(n_components = 3)
+        X = principle_component_analysis.fit_transform(FSV_UnitStructures_df)
+        explore_r3(X[:,0], X[:,1], X[:,2], name)
+    return FSV_UnitStructures_df
+
+# think about placing PCA into if plot. Return full dataframe instead of the projection of data.
+
+def multiplot_shell_df(sqlfunc, name_decomp, name_normalization, event_name, name):
+    participants = sqlfunc[:100]
+    #import pdb; pdb.set_trace()
+    collect_data = [plot_shell_df(participant, name_decomp, name_normalization, event_name, name, plot = False) for participant in participants]
+    concat_data = pd.concat(collect_data, sort = False)
+    principle_component_analysis = PCA(n_components = 3)
+    projected_data = principle_component_analysis.fit_transform(concat_data)
+    traces = [go.Scatter3d(x = projected_data[:,0],y = projected_data[:,1],z = projected_data[:,2], mode='markers', marker = dict(size=3))]
+    fig = go.Figure(data=traces)
+    offline.plot(fig, filename = 'plotly_files/' + name + '.html', auto_open=True)
+
 #Goal for Sunday:
-#   - plot participant data alongside shell * singular_vector
-#   - plot RSS by shell, and display full RSS.
+#   - plot participant data alongside shell * singular_vector -- Done -- double check.
+#   - look to plot the totality of Users games for each particular race idea
+#           ie. db.session.query(User).filter(User.name == username & How to ?filter by a subclass element.?)
+#   - plot RSS by shell, and display full RSS. -- Done -- double check
 #   - write new SQL routes in sqlalchemy and raw_SQL
-#   - look to begin constructing singular vectors for a subset of participants.
+#   - look to begin constructing singular vectors for a subset of participants. -- Begun
+#   - develop KMeans clusterer along cosine simmilarity.
+
+
 
 print('exit PCA')
