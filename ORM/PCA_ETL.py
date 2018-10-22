@@ -208,7 +208,7 @@ def plot_shell_df(participant, name_decomp, name_normalization, event_name, name
         explore_r3(X[:,0], X[:,1], X[:,2], name)
     return FSV_UnitStructures_df
 
-# think about placing PCA into if plot. Return full dataframe instead of the projection of data.
+# think about placing PCA into if plot. Return full dataframe instead of the projection of data. __
 
 def multiplot_shell_df(sqlfunc, name_decomp, name_normalization, event_name, name):
     participants = sqlfunc[:100]
