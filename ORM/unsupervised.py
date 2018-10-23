@@ -3,6 +3,8 @@ import numpy as np
 import sklearn
 from PCA_ETL import *
 import os
+import nltk
+from nltk.cluster.kmeans import KMeansClusterer
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.mixture import GaussianMixture

@@ -81,7 +81,6 @@ def aggregate_cumulative_time_events(aggregate_cumulative_events):
     return ACTE[~ACTE['second'].duplicated(keep='last')]
 
 def construct_df_UnitsStructures(participant, event_name, time = False):
-    # import pdb; pdb.set_trace()
     participant_events = participant.events_(event_name)
     participant_game_id = participant.game[0].id
     event_Dictionary_ = event_Dictionary()
@@ -102,7 +101,6 @@ def construct_df_UnitsStructures(participant, event_name, time = False):
     return df_event_gd_agg
 
 def construct_full_UnitsStructures_df(participant, event_name, time = False):
-    # import pdb; pdb.set_trace()
     participant_df_UnitsStructures = construct_df_UnitsStructures(participant, event_name, time = time)
     full_col = unique_event_names()[event_name]
     full_DataFrame = pd.DataFrame(columns = full_col)
@@ -112,6 +110,7 @@ def combine_df_UnitStructures(participant, list_event_name):
     _df_ = [construct_df_UnitsStructures(participant, event, time = True) for event in list_event_name]
     f = lambda x,y: pd.merge(x,y,right_on = 'second')
     #ittertools reduce to merge these functions. return as a DataFrame
+    ###### INCOMPLETE FUNCTION
 
 def combine_full_df_UnitStructures(participant, list_event_name):
     _df_ = [construct_full_UnitsStructures_df(participant, event, time = True) for event in list_event_name]
@@ -145,24 +144,24 @@ def pipeline(sql_func, event_name, time = True, func_decomp = PCA, func_normaliz
 # ?Move to unsupervised.py UNTESTED
 
 def load_Decomposition(participant, name_decomp, name_normalization, event_name):
-    # import pdb; pdb.set_trace()
     decomposition_load = joblib.load(name_decomp + '_' + name_normalization + '_Models/' + event_name + '_' +
     str(participant.id) + '_' + str(participant.user[0].id) + '_' + participant.playrace + '_' +
     str(participant.game[0].id) + '_' + participant.league +'.joblib')
     return decomposition_load
 
 def load_Decomposition_FSV(participant, name_decomp, name_normalization, event_name):
-    # import pdb; pdb.set_trace()
-    return load_Decomposition(participant, name_decomp, name_normalization, event_name).components_[0]
+    load_Decomp = load_Decomposition(participant, name_decomp, name_normalization, event_name).components_[0]
+    load_Decomp = -1 * load_Decomp if (load_Decomp @ np.ones_like(load_Decomp) < 0) else load_Decomp
+    return load_Decomp
 
 def load_Decomposiation_batch(sql_func, name_decomp, name_normalization, event_name):
-    participants = sql_func()
+    participants = sql_func[:300]
     return [load_Decomposition(participant, name_decomp, name_normalization, event_name) for participant in participants]
 
 def load_Decomposition_batch_FSV(sql_func, name_decomp, name_normalization, event_name):
-    participants = sql_func()
-    singular_vector_decomposition = [load_Decomposition_FSV(participant, name_decomp, name_normalization, event_name) for participant in participants]
-    singular_vector_decomposition_DataFrame = pd.concat(singular_vector_decomposition, axis = 0, columns = unique_event_names()[event_name], sort = False).T
+    participants = sql_func[:500]
+    singular_vector_decomposition = [pd.DataFrame(load_Decomposition_FSV(participant, name_decomp, name_normalization, event_name)) for participant in participants]
+    singular_vector_decomposition_DataFrame = pd.concat(singular_vector_decomposition, axis = 1, sort = False).T
     return singular_vector_decomposition_DataFrame
 
 def radial_RSS(participant, name_decomp, name_normalization, event_name):
@@ -171,9 +170,9 @@ def radial_RSS(participant, name_decomp, name_normalization, event_name):
     singular_vector = -1*singular_vector if ((singular_vector @ np.ones_like(singular_vector)) < 0) else singular_vector
     event_df = construct_full_UnitsStructures_df(participant, event_name, time = True).drop(columns = ['second', 'participant_id'])
     min_max = MinMaxScaler()
-    event_df_mm = min_max.fit_transform(event_df)
-    inner_product = np.arccos((event_df_mm @ singular_vector) * (1 / event_df.apply(np.linalg.norm, axis = 1))) * event_df.apply(np.linalg.norm, axis = 1)
-    return event_df.apply(np.linalg.norm, axis = 1), inner_product
+    event_df_mm = pd.DataFrame(min_max.fit_transform(event_df))
+    inner_product = np.arccos((event_df_mm @ singular_vector) * (1 / event_df_mm.apply(np.linalg.norm, axis = 1))) * event_df_mm.apply(np.linalg.norm, axis = 1)
+    return event_df_mm.apply(np.linalg.norm, axis = 1), inner_product
 
 def cummalative_radial_RSS(participant, name_decomp, name_normalization, event_name):
     # look at this function closer. The elements should be ordered by np.linalg.norm then cumal sum
@@ -233,6 +232,12 @@ def multiplot_shell_df(sqlfunc, name_decomp, name_normalization, event_name, nam
     fig = go.Figure(data=traces)
     offline.plot(fig, filename = 'plotly_files/' + name + '.html', auto_open=True)
 
+def multiplot_Singular_Vectors(sql_func, name_decomp, name_normalization, event_name, name):
+    singular_vectors = load_Decomposition_batch_FSV(sql_func, name_decomp, name_normalization, event_name)
+    pca = PCA(n_components = 3)
+    X = pca.fit_transform(singular_vectors)
+    import pdb; pdb.set_trace()
+    explore_r3(X[:,0], X[:,1], X[:,2], name)
 
 #Goal for Sunday:
 #   - plot participant data alongside shell * singular_vector -- Done -- double check.

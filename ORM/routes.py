@@ -10,7 +10,7 @@ print('enter routes.py')
 #                         BasicCommandEvent, TargetPointEvent, Player_Games, Player_UDiE
 
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||untested
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 def participant_Name(name):
@@ -47,6 +47,28 @@ def game_Time(upperBound, lowerBound):
 def game_Expansion(expansion):
     # generate a random sample from query.
     return db.session.query(Game).filter(Game.expansion == expansion).all()
+
+def unitbornevent_Name(unit_type_name):
+    # generate a random sample from query
+    return db.session.query(UnitBornEvent).filter(UnitBornEvent.unit_type_name == unit_type_name).all()
+
+def unitdiedevent_KillingUnit(killing_unit):
+    # generate a random sample from query
+    return db.session.query(UnitDiedEvent).filter(UnitDiedEvent.killing_unit == killing_unit).all()
+
+def unitdiedevent_Unit(unit):
+    # generate a random sample from query
+    return db.session.query(UnitDiedEvent).filter(UnitDiedEvent.unit == unit).all()
+
+def unitdiedevent_location(location, radius):
+    # generate a random sample from query
+    return db.session.query(UnitDiedEvent).filter(radius**2 >= (UnitDiedEvent.loc_x - location[0])**2 + (UnitDiedEvent.loc_y - location[1])**2)
+
+def upgradecompleteevent_Name(upgrade_type_name):
+    return db.session.query(UpgradeCompleteEvent).filter(UpgradeCompleteEvent.upgrade_type_name == upgrade_type_name).all()
+
+def unitinitevent_unit(unit_type_name):
+    return db.session.query(UnitInitEvent).filter(UnitInitEvent.unit_type_name == unit_type_name).all()
 
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
