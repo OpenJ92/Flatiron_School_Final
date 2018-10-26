@@ -3,8 +3,8 @@
 from routes import *
 import matplotlib.pyplot as plt
 
-unique_map_names = [map_['value'] for map_ in get_Game_maps()]
-A = event_df_from_Game_TPE_map(unique_map_names[0])
+# unique_map_names = [map_['value'] for map_ in get_Game_maps()]
+# A = event_df_from_Game_TPE_map(unique_map_names[0])
 
 def linear_regression(list_of_feature_names, target_feature, _df, order = 1, norm = True, closed_form = False, steps = 500, show_plot = True, max_lik = True, bias_variance = True):
     samp_df = _df.sample(int(4*(_df.shape[0])/5))
@@ -172,27 +172,27 @@ def binary_classifification_tests(y, y_hat, val):
 
     return None
 
-attack_Move = A[A['ability_name'] == 'Attack'][['loc_x', 'loc_y', 'second']]
-
-x_mean = attack_Move['loc_x'].mean()
-y_mean = attack_Move['loc_y'].mean()
-
-attack_Move['loc_x'] = attack_Move['loc_x'].apply(lambda x: x - x_mean)
-attack_Move['loc_y'] = attack_Move['loc_y'].apply(lambda y: y - y_mean)
-
-A = attack_Move[-1*attack_Move['loc_x'] > attack_Move['loc_y']]
-B = attack_Move[-1*attack_Move['loc_x'] <= attack_Move['loc_y']]
-A['loc_x'] = -A['loc_x']
-A['loc_y'] = -A['loc_y']
-
-attack_Move_concat = pd.concat([A, B])
-
-intervals = 10
-attack_Move_concat_interval = [attack_Move_concat[
-    (attack_Move_concat['second'] < (attack_Move_concat['second'].max() / intervals)* (interval - intervals) + attack_Move_concat['second'].max())
-    &
-    (attack_Move_concat['second'] > (attack_Move_concat['second'].max() / intervals)* ((interval - 1)- intervals) + attack_Move_concat['second'].max())]
-    for interval in range(1, intervals))]
+# attack_Move = A[A['ability_name'] == 'Attack'][['loc_x', 'loc_y', 'second']]
+#
+# x_mean = attack_Move['loc_x'].mean()
+# y_mean = attack_Move['loc_y'].mean()
+#
+# attack_Move['loc_x'] = attack_Move['loc_x'].apply(lambda x: x - x_mean)
+# attack_Move['loc_y'] = attack_Move['loc_y'].apply(lambda y: y - y_mean)
+#
+# A = attack_Move[-1*attack_Move['loc_x'] > attack_Move['loc_y']]
+# B = attack_Move[-1*attack_Move['loc_x'] <= attack_Move['loc_y']]
+# A['loc_x'] = -A['loc_x']
+# A['loc_y'] = -A['loc_y']
+#
+# attack_Move_concat = pd.concat([A, B])
+#
+# intervals = 10
+# attack_Move_concat_interval = [attack_Move_concat[
+#     (attack_Move_concat['second'] < (attack_Move_concat['second'].max() / intervals)* (interval - intervals) + attack_Move_concat['second'].max())
+#     &
+#     (attack_Move_concat['second'] > (attack_Move_concat['second'].max() / intervals)* ((interval - 1)- intervals) + attack_Move_concat['second'].max())]
+#     for interval in range(1, intervals)]
 
 
 #binary_logistic_regression(['loc_x', 'loc_y'], target_feature, _df, thresh = .5,order = 1, norm = True, steps = 10000, show_tests = True, show_plot = True)

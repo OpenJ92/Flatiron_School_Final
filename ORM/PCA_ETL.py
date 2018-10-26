@@ -31,7 +31,7 @@ offline.init_notebook_mode()
 
 def event_Dictionary():
     UBE_t = ['Banshee', 'Cyclone', 'Marine', 'Medivac', 'Raven', 'Reaper', 'SiegeTank', 'VikingFighter', 'Hellion', 'Liberator', 'Thor', 'Marauder', 'WidowMine', 'HellionTank', 'Battlecruiser', 'Ghost', 'SCV']
-    UBE_z = ['Roach', 'Baneling',  'Mutalisk', 'Queen', 'Zergling', 'Corruptor', 'Hydralisk', 'Viper', 'Ultralisk', 'Drone']
+    UBE_z = ['Roach', 'Baneling',  'Mutalisk', 'Queen', 'Zergling', 'Corruptor', 'Hydralisk', 'Viper', 'Ultralisk', 'Drone', 'Overlord']
     UBE_p = ['Stalker', 'Colossus', 'Disruptor', 'Immortal', 'WarpPrism', 'Observer', 'Adept', 'Phoenix', 'Oracle', 'Zealot', 'Sentry', 'Tempest', 'Carrier', 'VoidRay', 'Archon', 'Mothership', 'HighTemplar', 'Probe']
 
     PSE_coldrop = ['name', 'player', '_sa_instance_state']
@@ -80,7 +80,7 @@ def aggregate_cumulative_time_events(aggregate_cumulative_events):
     ACTE = pd.merge(aggregate_cumulative_events, second_df, how = 'right', on = 'second').sort_values(by = ['second']).ffill()
     return ACTE[~ACTE['second'].duplicated(keep='last')]
 
-def construct_df_UnitsStructures(participant, event_name, time = False):
+def construct_df_UnitsStructures(participant, event_name, aggregate = True, time = False):
     participant_events = participant.events_(event_name)
     participant_game_id = participant.game[0].id
     event_Dictionary_ = event_Dictionary()
@@ -90,50 +90,64 @@ def construct_df_UnitsStructures(participant, event_name, time = False):
     except:
         return None
 
+    import pdb; pdb.set_trace()
+
     df_event_gd = pd.get_dummies(df_event[event_Dictionary_[event_name]['event_column']])
     df_event_gd_filter = df_event_gd[[col for col in df_event_gd.columns if col in event_Dictionary_[event_name][participant.playrace]]]
-    df_event_gd_agg = aggregate_cumulative_events(df_event[event_Dictionary_['drop_add']], df_event_gd_filter)
+    df_event_gd_agg = df_event_gd_filter
+
+    import pdb; pdb.set_trace()
+
+    if aggregate:
+        df_event_gd_agg = aggregate_cumulative_events(df_event[event_Dictionary_['drop_add']], df_event_gd_filter)
 
     if time:
         df_event_gd_agg = aggregate_cumulative_time_events(df_event_gd_agg)
 
+    if not time and not aggregate:
+        df_event_gd_agg = pd.concat([df_event_gd_filter, df_event[['second', 'participant_id']]], axis = 1, sort = False)
+
+    import pdb; pdb.set_trace()
+
     df_event_gd_agg = df_event_gd_agg[~df_event_gd_agg['second'].duplicated(keep='last')]
     return df_event_gd_agg
 
-def construct_full_UnitsStructures_df(participant, event_name, time = False):
-    participant_df_UnitsStructures = construct_df_UnitsStructures(participant, event_name, time = time)
+def construct_full_UnitsStructures_df(participant, event_name, aggregate = True, time = False):
+    participant_df_UnitsStructures = construct_df_UnitsStructures(participant, event_name, aggregate, time)
     full_col = unique_event_names()[event_name]
     full_DataFrame = pd.DataFrame(columns = full_col)
     return pd.concat([participant_df_UnitsStructures, full_DataFrame], axis = 0, sort = False).fillna(0)[full_col + ['second', 'participant_id']]
 
-def combine_df_UnitStructures(participant, list_event_name):
-    _df_ = [construct_df_UnitsStructures(participant, event, time = True) for event in list_event_name]
+def combine_df_UnitStructures(participant, list_event_name, time, aggragate):
+    _df_ = [construct_df_UnitsStructures(participant, event, time = time, aggragate = aggragate) for event in list_event_name]
     f = lambda x,y: pd.merge(x,y,right_on = 'second')
     #ittertools reduce to merge these functions. return as a DataFrame
     ###### INCOMPLETE FUNCTION
 
-def combine_full_df_UnitStructures(participant, list_event_name):
-    _df_ = [construct_full_UnitsStructures_df(participant, event, time = True) for event in list_event_name]
+def combine_full_df_UnitStructures(participant, list_event_name, time, aggragate):
+    _df_ = [construct_full_UnitsStructures_df(participant, event, time = time, aggragate = aggragate) for event in list_event_name]
     f = lambda x,y: pd.merge(x,y,right_on = 'second')
     #ittertools reduce to merge these functions. return as a DataFrame
     ###### INCOMPLETE FUNCTION
 
-def fit_construct_PCAoTSVD(participant, event_name, time = False, func_decomp = PCA, func_normalization = MinMaxScaler, name_decomp = 'PCA', name_normalization = 'MinMax'):
-    if os.path.exists(name_decomp + '_' + name_normalization + '_Models/'+ event_name + '_' + str(participant.id) + '_' + str(participant.user[0].id) + '_' + participant.playrace + '_' + str(participant.game[0].id) + '_' + participant.league +'.joblib'):
+### There's an issue with the file paths. Look to construct the initial forward and back path at the beginning of the
+### function and then place then into the code as needed.
+def fit_construct_PCAoTSVD(participant, event_name, time = False, aggregate = True, func_decomp = PCA, func_normalization = MinMaxScaler, name_decomp = 'PCA', name_normalization = 'MinMax'):
+    if os.path.exists(name_decomp + '_' + name_normalization + '_time' + str(time) + '_agg' + str(aggregate) + '_Models/'+ event_name + '_' + str(participant.id) + '_' + str(participant.user[0].id) + '_' + participant.playrace + '_' + str(participant.game[0].id) + '_' + participant.league +'.joblib'):
         print('File already exists: ' + name_decomp + '_' + name_normalization + '_Models/'+ event_name + '_' + str(participant.id) + '_' + str(participant.user[0].id) + '_' + participant.playrace + '_' + str(participant.game[0].id) + '_' + participant.league +'.joblib')
         return None
-    construct_full_UnitsStructures_df_ = construct_full_UnitsStructures_df(participant, event_name, time).drop(columns = ['second', 'participant_id'])
+    construct_full_UnitsStructures_df_ = construct_full_UnitsStructures_df(participant, event_name, time, aggregate).drop(columns = ['second', 'participant_id'])
     decomposition_analysis = func_decomp(random_state = 20)
     normalization_scalar = func_normalization()
     construct_full_UnitsStructures_df_mm = normalization_scalar.fit_transform(construct_full_UnitsStructures_df_)
     decomposition_analysis.fit(construct_full_UnitsStructures_df_mm)
-    None if os.path.exists(name_decomp + '_' + name_normalization + '_Models/') else os.mkdir(name_decomp + '_' + name_normalization + '_Models/')
+    None if os.path.exists(name_decomp + '_' + name_normalization + '_time' + str(time) + '_agg' + str(aggregate) + '_Models/') else os.mkdir(name_decomp + '_' + name_normalization + '_time' + str(time) + '_agg' + str(aggregate) + '_Models/')
     joblib.dump(decomposition_analysis,
-                name_decomp + '_' + name_normalization + '_Models/' + event_name + '_' +
+                name_decomp + '_' + name_normalization + '_' + str(time) + '_' + str(aggregate) + '_Models/' + event_name + '_' +
                 str(participant.id) + '_' + str(participant.user[0].id) + '_' + participant.playrace + '_' +
-                str(participant.game[0].id) + '_' + participant.league +'.joblib')
+                str(participant.game[0].id) + '_' + participant.league + '.joblib')
 
-def pipeline(sql_func, event_name, time = True, func_decomp = PCA, func_normalization = MinMaxScaler, name_decomp = 'PCA', name_normalization = 'MinMax'):
+def pipeline(sql_func, event_name, time = True, aggregate = True, func_decomp = PCA, func_normalization = MinMaxScaler, name_decomp = 'PCA', name_normalization = 'MinMax'):
     participants = sql_func()
     for participant in participants:
         try:
@@ -143,14 +157,14 @@ def pipeline(sql_func, event_name, time = True, func_decomp = PCA, func_normaliz
 
 # ?Move to unsupervised.py UNTESTED
 
-def load_Decomposition(participant, name_decomp, name_normalization, event_name):
-    decomposition_load = joblib.load(name_decomp + '_' + name_normalization + '_Models/' + event_name + '_' +
+def load_Decomposition(participant, time, aggragate, name_decomp, name_normalization, event_name):
+    decomposition_load = joblib.load(name_decomp + '_' + name_normalization + '_time' + str(time) + '_agg' + str(aggragate) + '_Models/' + event_name + '_' +
     str(participant.id) + '_' + str(participant.user[0].id) + '_' + participant.playrace + '_' +
     str(participant.game[0].id) + '_' + participant.league +'.joblib')
     return decomposition_load
 
-def load_Decomposition_FSV(participant, name_decomp, name_normalization, event_name):
-    load_Decomp = load_Decomposition(participant, name_decomp, name_normalization, event_name).components_[0]
+def load_Decomposition_FSV(participant, time, aggragate, name_decomp, name_normalization, event_name):
+    load_Decomp = load_Decomposition(participant, time, aggragate, name_decomp, name_normalization, event_name).components_[0]
     load_Decomp = -1 * load_Decomp if (load_Decomp @ np.ones_like(load_Decomp) < 0) else load_Decomp
     return load_Decomp
 
@@ -160,15 +174,14 @@ def load_Decomposiation_batch(sql_func, name_decomp, name_normalization, event_n
 
 def load_Decomposition_batch_FSV(sql_func, name_decomp, name_normalization, event_name):
     participants = sql_func[:500]
-    singular_vector_decomposition = [pd.DataFrame(load_Decomposition_FSV(participant, name_decomp, name_normalization, event_name)) for participant in participants]
+    singular_vector_decomposition = [pd.DataFrame(load_Decomposition_FSV(participant, time, aggragate, name_decomp, name_normalization, event_name)) for participant in participants]
     singular_vector_decomposition_DataFrame = pd.concat(singular_vector_decomposition, axis = 1, sort = False).T
     return singular_vector_decomposition_DataFrame
 
-def radial_RSS(participant, name_decomp, name_normalization, event_name):
-    # import pdb; pdb.set_trace()
-    singular_vector = load_Decomposition_FSV(participant, name_decomp, name_normalization, event_name)
+def radial_RSS(participant, time, aggragate, name_decomp, name_normalization, event_name):
+    singular_vector = load_Decomposition_FSV(participant, time, aggragate, name_decomp, name_normalization, event_name)
     singular_vector = -1*singular_vector if ((singular_vector @ np.ones_like(singular_vector)) < 0) else singular_vector
-    event_df = construct_full_UnitsStructures_df(participant, event_name, time = True).drop(columns = ['second', 'participant_id'])
+    event_df = construct_full_UnitsStructures_df(participant, event_name, time, aggragate).drop(columns = ['second', 'participant_id'])
     min_max = MinMaxScaler()
     event_df_mm = pd.DataFrame(min_max.fit_transform(event_df))
     inner_product = np.arccos((event_df_mm @ singular_vector) * (1 / event_df_mm.apply(np.linalg.norm, axis = 1))) * event_df_mm.apply(np.linalg.norm, axis = 1)
@@ -188,7 +201,6 @@ def full_radial_RSS(participant, name_decomp, name_normalization, event_name):
 def plot_radial_RSS(participant, name_decomp, name_normalization, event_name):
     # for use with radial_RSS and cummalative_radial_RSS
     X, y = radial_RSS(participant, name_decomp, name_normalization, event_name)
-    # import pdb; pdb.set_trace()
     plt.scatter(X,y)
     plt.show()
 
@@ -208,7 +220,6 @@ def plot_shell_df(participant, name_decomp, name_normalization, event_name, name
     FSV = load_Decomposition_FSV(participant, name_decomp, name_normalization, event_name)
     FSV = FSV if (FSV @ np.ones_like(FSV) > 0) else -1*FSV
     FSV_df = pd.DataFrame([i*FSV for i in np.linspace(0,2,500)], columns = unique_event_names()[event_name])
-    # import pdb; pdb.set_trace()
     UnitStructures = construct_full_UnitsStructures_df(participant, event_name, time = True).drop(columns = ['second', 'participant_id'])
     min_max = MinMaxScaler()
     UnitStructures_ = pd.DataFrame(min_max.fit_transform(UnitStructures), columns = unique_event_names()[event_name])
@@ -223,7 +234,6 @@ def plot_shell_df(participant, name_decomp, name_normalization, event_name, name
 
 def multiplot_shell_df(sqlfunc, name_decomp, name_normalization, event_name, name):
     participants = sqlfunc[30:50]
-    # import pdb; pdb.set_trace()
     collect_data = [plot_shell_df(participant, name_decomp, name_normalization, event_name, name, plot = False) for participant in participants]
     concat_data = pd.concat(collect_data, sort = False)
     principle_component_analysis = PCA(n_components = 3)
@@ -239,15 +249,17 @@ def multiplot_Singular_Vectors(sql_func, name_decomp, name_normalization, event_
     import pdb; pdb.set_trace()
     explore_r3(X[:,0], X[:,1], X[:,2], name)
 
+
 #Goal for Sunday:
 #   - plot participant data alongside shell * singular_vector -- Done -- double check.
 #   - look to plot the totality of Users games for each particular race idea
 #           ie. db.session.query(User).filter(User.name == username & How to ?filter by a subclass element.?)
 #   - plot RSS by shell, and display full RSS. -- Done -- double check
-#   - write new SQL routes in sqlalchemy and raw_SQL
+#   - write new SQL routes in sqlalchemy and raw_SQL ***
+####### Test each function in this file for errors.  Begin to construct Singular vectors for each type of event and combinations of events
+#
 #   - look to begin constructing singular vectors for a subset of participants. -- Begun
 #   - develop KMeans clusterer along cosine simmilarity.
-#   - Why aren't
 
 
 
