@@ -80,6 +80,8 @@ def aggregate_cumulative_time_events(aggregate_cumulative_events):
     ACTE = pd.merge(aggregate_cumulative_events, second_df, how = 'right', on = 'second').sort_values(by = ['second']).ffill()
     return ACTE[~ACTE['second'].duplicated(keep='last')]
 
+#### Consider exactly what each variable is and what exterior function calls need. Currently, this function does not function under each possible state.
+#### df_event_gd_agg.groupby(['second']).sum().drop(columns = ['participant_id']).plot()
 def construct_df_UnitsStructures(participant, event_name, aggregate = True, time = False):
     participant_events = participant.events_(event_name)
     participant_game_id = participant.game[0].id
@@ -92,20 +94,22 @@ def construct_df_UnitsStructures(participant, event_name, aggregate = True, time
 
     import pdb; pdb.set_trace()
 
-    df_event_gd = pd.get_dummies(df_event[event_Dictionary_[event_name]['event_column']])
-    df_event_gd_filter = df_event_gd[[col for col in df_event_gd.columns if col in event_Dictionary_[event_name][participant.playrace]]]
+    df_event_gd = pd.get_dummies(df_event[event_Dictionary_[event_name]['event_column']]) 
+    df_event_gd_filter = df_event_gd[[col for col in df_event_gd.columns if col in unique_event_names()[event_name]]]
     df_event_gd_agg = df_event_gd_filter
 
     import pdb; pdb.set_trace()
 
     if aggregate:
+        df_event_gd_filter = pd.concat([df_event_gd_filter, df_event[event_Dictionary_['drop_add']]], sort = False)
         df_event_gd_agg = aggregate_cumulative_events(df_event[event_Dictionary_['drop_add']], df_event_gd_filter)
 
     if time:
+        df_event_gd_agg = pd.concat([df_event_gd_filter, df_event[event_Dictionary_['drop_add']]], sort = False)
         df_event_gd_agg = aggregate_cumulative_time_events(df_event_gd_agg)
 
     if not time and not aggregate:
-        df_event_gd_agg = pd.concat([df_event_gd_filter, df_event[['second', 'participant_id']]], axis = 1, sort = False)
+        df_event_gd_agg = pd.concat([df_event_gd_filter, df_event[['second']]], axis = 1, sort = False)
 
     import pdb; pdb.set_trace()
 
@@ -130,11 +134,11 @@ def combine_full_df_UnitStructures(participant, list_event_name, time, aggragate
     #ittertools reduce to merge these functions. return as a DataFrame
     ###### INCOMPLETE FUNCTION
 
-### There's an issue with the file paths. Look to construct the initial forward and back path at the beginning of the
-### function and then place then into the code as needed.
 def fit_construct_PCAoTSVD(participant, event_name, time = False, aggregate = True, func_decomp = PCA, func_normalization = MinMaxScaler, name_decomp = 'PCA', name_normalization = 'MinMax'):
-    if os.path.exists(name_decomp + '_' + name_normalization + '_time' + str(time) + '_agg' + str(aggregate) + '_Models/'+ event_name + '_' + str(participant.id) + '_' + str(participant.user[0].id) + '_' + participant.playrace + '_' + str(participant.game[0].id) + '_' + participant.league +'.joblib'):
-        print('File already exists: ' + name_decomp + '_' + name_normalization + '_Models/'+ event_name + '_' + str(participant.id) + '_' + str(participant.user[0].id) + '_' + participant.playrace + '_' + str(participant.game[0].id) + '_' + participant.league +'.joblib')
+    _path = name_decomp + '_' + name_normalization + '_time' + str(time) + '_agg' + str(aggregate) + '_Models/'
+    path_ = event_name + '_' + str(participant.id) + '_' + str(participant.user[0].id) + '_' + participant.playrace + '_' + str(participant.game[0].id) + '_' + participant.league +'.joblib'
+    if os.path.exists(_path + path_):
+        print('File already exists: ' + _path + path_)
         return None
     construct_full_UnitsStructures_df_ = construct_full_UnitsStructures_df(participant, event_name, time, aggregate).drop(columns = ['second', 'participant_id'])
     decomposition_analysis = func_decomp(random_state = 20)
@@ -142,10 +146,7 @@ def fit_construct_PCAoTSVD(participant, event_name, time = False, aggregate = Tr
     construct_full_UnitsStructures_df_mm = normalization_scalar.fit_transform(construct_full_UnitsStructures_df_)
     decomposition_analysis.fit(construct_full_UnitsStructures_df_mm)
     None if os.path.exists(name_decomp + '_' + name_normalization + '_time' + str(time) + '_agg' + str(aggregate) + '_Models/') else os.mkdir(name_decomp + '_' + name_normalization + '_time' + str(time) + '_agg' + str(aggregate) + '_Models/')
-    joblib.dump(decomposition_analysis,
-                name_decomp + '_' + name_normalization + '_' + str(time) + '_' + str(aggregate) + '_Models/' + event_name + '_' +
-                str(participant.id) + '_' + str(participant.user[0].id) + '_' + participant.playrace + '_' +
-                str(participant.game[0].id) + '_' + participant.league + '.joblib')
+    joblib.dump(decomposition_analysis, _path + path_)
 
 def pipeline(sql_func, event_name, time = True, aggregate = True, func_decomp = PCA, func_normalization = MinMaxScaler, name_decomp = 'PCA', name_normalization = 'MinMax'):
     participants = sql_func()

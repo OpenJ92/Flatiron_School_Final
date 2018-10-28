@@ -1,6 +1,6 @@
 #from ORM.__init__ import db
 import pandas as pd
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, create_engine
 from models import *
 
 
@@ -8,6 +8,39 @@ print('enter routes.py')
 # Player, Game, PlayerStatsEvent, UnitBornEvent, UnitDiedEvent, \
 #                         UnitTypeChangeEvent, UpgradeCompleteEvent, UnitDoneEvent, \
 #                         BasicCommandEvent, TargetPointEvent, Player_Games, Player_UDiE
+
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||Raw SQL Calls
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+def random_():
+    engine = create_engine('sqlite:///replays.db')
+    with engine.connect() as con:
+         A = con.execute("""SELECT * FROM participants_users as UP
+                            WHERE UP.user_id = (SELECT id FROM users WHERE name = 'ODSTJacob')""").fetchall()
+         B = con.execute("""SELECT DISTINCT name FROM participants""").fetchall()
+         C = con.execute("""SELECT DISTINCT map FROM games""").fetchall()
+         D = con.execute("""SELECT * FROM users
+                            WHERE name like 'O%' and region = 'us'""").fetchall()
+         E = con.execute("""SELECT * FROM
+                            (SELECT * FROM users as u
+                            INNER JOIN participants_users as up
+                            ON u.id = up.user_id) AS uup
+                            INNER JOIN participants
+                            ON participants.id = uup.participant_id""").fetchall()
+         F = con.execute("""SELECT * FROM users as u
+                            INNER JOIN
+                            participants_users as up
+                            ON u.id = up.user_id""").fetchall()
+
+def SQL_call_with_input(input):
+    engine = create_engine('sqlite:///replays.db')
+    with engine.connect() as con:
+        return con.execute("""SELECT *
+                              FROM users
+                              WHERE name = %d
+                              """ % input)
+
 
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||untested
