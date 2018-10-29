@@ -186,9 +186,8 @@ class PlayerStatsEvent(db.Model):
     def __repr__(self):
         return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
-    @classmethod
-    def all(cls):
-        return db.session.query(cls).all()
+    def column_names():
+        return []
 
 class UnitBornEvent(db.Model):
     __tablename__ = 'unitbornevents'
@@ -208,8 +207,8 @@ class UnitBornEvent(db.Model):
         return '<' + self.name + ' (player = ' + self.participant.name + ') >'
 
     @classmethod
-    def all(cls):
-        return db.session.query(cls).all()
+    def get_col_names(cls):
+        return ['id', 'participant_id', 'name', 'second', 'unit_type_name', 'loc_x', 'loc_y']
 
 #Take a closer look at this
 class UnitDiedEvent(db.Model):
@@ -229,6 +228,10 @@ class UnitDiedEvent(db.Model):
 
     def __repr__(self):
         return '<' + self.name + ' (participant = ' + self.participant.name + ') >'
+
+    @classmethod
+    def get_col_names(cls):
+        return ['id', 'participant_id', 'name', 'second', 'killing_unit', 'unit', 'loc_x', 'loc_y']
 
 class UnitTypeChangeEvent(db.Model):
     __tablename__ = 'unittypechangeevents'

@@ -33,13 +33,45 @@ def random_():
                             participants_users as up
                             ON u.id = up.user_id""").fetchall()
 
-def SQL_call_with_input(input):
+def SQL_call_with_input(input_):
     engine = create_engine('sqlite:///replays.db')
     with engine.connect() as con:
-        return con.execute("""SELECT *
-                              FROM users
-                              WHERE name = %d
-                              """ % input)
+        return con.execute("""SELECT * FROM users WHERE name = %s""" % input_).fetchall()
+
+def get_PlayerStatsEvents(participant):
+    engine = create_engine('sqlite:///replays.db')
+    with engine.connect() as con:
+        return con.execute(""" SELECT * FROM playerstatsevents AS PSE WHERE PSE.participant_id = %s""" % participant.id).fetchall()
+
+def get_UnitBornEvent(participant):
+    engine = create_engine('sqlite:///replays.db')
+    with engine.connect() as con:
+        return con.execute(""" SELECT * FROM unitbornevents AS UBE WHERE UBE.participant_id = %s""" % participant.id).fetchall()
+
+def get_UnitDiedEvent(participant):
+    engine = create_engine('sqlite:///replays.db')
+    with engine.connect() as con:
+        return con.execute(""" SELECT * FROM unitdiedevents AS UDE WHERE UDE.participant_id = %s""" % participant.id).fetchall()
+
+def get_UnitTypeChangeEvent(participant):
+    engine = create_engine('sqlite:///replays.db')
+    with engine.connect() as con:
+        return con.execute("""SELECT * FROM unittypechangeevents AS UTCE WHERE UTCE.participant_id = %s""" % participant.id).fetchall()
+
+def get_UnitInitEvent(participant):
+    engine = create_engine('sqlite:///replays.db')
+    with engine.connect() as con:
+        return con.execute("""SELECT * FROM unitinitevent AS UIE WHERE UIE.participant_id = %s""" % participant.id).fetchall()
+
+def get_UnitDoneEvent(participant):
+    engine = create_engine('sqlite:///replays.db')
+    with engine.connect() as con:
+        return con.execute("""SELECT * FROM unitdoneevent AS UDE WHERE UDE.participant_id = %s""" % participant.id).fetchall()
+
+def get_BasicCommandEvent(participant):
+    engine = create_engine('sqlite:///replays.db')
+    with engine.connect() as con:
+        return con.execute("""SELECT * FROM basiccommandevent AS BCE WHERE BCE.participant_id = %s""" % participant.id).fetchall()
 
 
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
