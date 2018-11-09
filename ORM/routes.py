@@ -73,6 +73,11 @@ def get_BasicCommandEvent(participant):
     with engine.connect() as con:
         return con.execute("""SELECT * FROM basiccommandevent AS BCE WHERE BCE.participant_id = %s""" % participant.id).fetchall()
 
+def get_TargetPointEvent(participant):
+    engine = create_engine('sqlite:///replays.db')
+    with engine.connect() as con:
+        return con.execute("""SELECT * FROM targetpointevent AS TPE WHERE TPE.participant_id = %s""" % participant.id).fetchall()
+
 
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||untested
