@@ -150,7 +150,7 @@ def fit_construct_PCAoTSVD(participant, event_name, time = False, aggregate = Tr
         print(e)
 
 def fit_construct_PCAoTSVD_combined(participant, event_names, aggregate = True, func_decomp = PCA, func_normalization = MinMaxScaler, name_decomp = 'PCA', name_normalization = 'MinMax'):
-    _path = str(sorted(event_names)) + '_' +name_decomp + '_' + name_normalization + '_time' + 'True' + '_agg' + str(aggregate) + '_c_Models/'
+    _path = str(sorted(event_names)) + '_' + name_decomp + '_' + name_normalization + '_time' + 'True' + '_agg' + str(aggregate) + '_c_Models/'
     path_ = str(sorted(event_names)) + '_' + str(participant.id) + '_' + str(participant.user[0].id) + '_' + participant.playrace + '_' + str(participant.game[0].id) + '_' + participant.league +'.joblib'
     if os.path.exists(_path + path_):
         print('File already exists: ' + _path + path_)
@@ -172,15 +172,19 @@ def fit_construct_PCAoTSVD_combined(participant, event_names, aggregate = True, 
 def pipeline(sql_func, func_decomp = PCA, func_normalization = MinMaxScaler, name_decomp = 'PCA', name_normalization = 'MinMax'):
     participants = sql_func()
     event_list = ['UDE', 'BCE', 'TPE', 'UBE']
-    agg_time = [True, False]
+    agg_time = [[True, False], [False, True], [False, False], [True, True]]
 
     for event_name in event_list:
-        for a_t in list(combinations(agg_time, 2)):
+        for a_t in agg_time:
             for participant in participants:
                 try:
                     fit_construct_PCAoTSVD(participant, event_name, a_t[0], a_t[1], func_decomp, func_normalization, name_decomp, name_normalization)
                 except Exception as e:
                     print(e)
+            #import pdb; pdb.set_trace()
+            A = [file.split('_') for file in os.listdir(str(event_name) + '_'+ name_decomp  + '_'+ name_normalization +  '_time' + str(a_t[0]) + '_agg' + str(a_t[1]) + '_Models')]
+            B = pd.DataFrame(A, columns = ['event', 'participant_id', 'user_id', 'playrace', 'game_id', 'league'])
+            B.to_csv(str(event_name) + '_'+ name_decomp  + '_'+ name_normalization +  '_time' + str(a_t[0]) + '_agg' + str(a_t[1]) + '_Models/_directory_information.csv')
 
 def combined_pipeline(sql_func, func_decomp = PCA, func_normalization = MinMaxScaler, name_decomp = 'PCA', name_normalization = 'MinMax'):
     participants = sql_func()
@@ -190,16 +194,22 @@ def combined_pipeline(sql_func, func_decomp = PCA, func_normalization = MinMaxSc
     for i in range(2,len(event_list)):
         for event_combs in list(combinations(event_list, i)):
             for a_t in agg_time:
+                #import pdb; pdb.set_trace()
                 for participant in participants:
                     try:
                         fit_construct_PCAoTSVD_combined(participant, event_combs, a_t)
                     except Exception as e:
                         print(e)
+                A = [file.split('_') for file in os.listdir(str(sorted([i for i in event_combs])) + '_'+ name_decomp  + '_'+ name_normalization +  '_time' + str(True) + '_agg' + str(a_t) + '_c_Models')]
+                B = pd.DataFrame(A, columns = ['event', 'participant_id', 'user_id', 'playrace', 'game_id', 'league'])
+                B.to_csv(str(sorted([i for i in event_combs])) + '_'+ name_decomp  + '_'+ name_normalization +  '_time' + str(True) + '_agg' + str(a_t) + '_c_Models/_directory_information.csv')
 
 combined_pipeline(db.session.query(Participant).filter(Participant.league == 20).all)
 pipeline(db.session.query(Participant).filter(Participant.league == 20).all)
 
 ## Completed Pipeline queries:
-##      1. db.session.query(Participant).filter(Participant.league == 20).all (in_Progress)
+##      1. db.session.query(Participant).filter(Participant.league == 20).all (in_Progress)(combined_pipline, pipline)
+
+## NOTE Construct text file for each directory created listing what elements belong to that directory.
 
 print('exit PCA')

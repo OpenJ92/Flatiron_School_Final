@@ -25,8 +25,37 @@ offline.init_notebook_mode()
 ##          for Aggregate true, use radial RSS as a means to measure goodness of fit.
 ##      4. Determine the composition of each cluster with respect to the elements clustered on.
 
+
+# Consider how one can filter on n parameters. Should it be done here or in the Database query?
+def load_decomposition(obj, time, aggregate, name_decomp, name_normalization, event_name):
+    if isinstance(obj, Participant):
+        load_Participant_decomposition(obj, time, aggregate, name_decomp, name_normalization, event_name)
+        # Return the participant decomposition of this type. In load_Participant_decomposition, check to see if that participant's id is in that directory's csv.
+        # example: [participant_Decomposition]
+        pass
+    elif isinstance(obj, Game):
+        load_Game_decomposition(obj,time, aggregate, name_decomp, name_normalization, event_name)
+        # Return the participants decomposition belonging to game object
+        # example: [participant_1_Decompostion, particiapnt_2_Decompostion]
+        pass
+    elif isinstance(obj, User):
+        load_User_decomposition(obj,time, aggregate, name_decomp, name_normalization, event_name)
+        # Return all participant decompositions assosiated with the passed in User id.
+        # example: [participant_decompostionA, participant_decompositionB, ....., participant_decompositionN, ...]
+        pass
+    elif obj in ['Protoss', 'Terran', 'Zerg']:
+        load_Playrace_decomposition(obj,time, aggregate, name_decomp, name_normalization, event_name)
+        # Return all participant decompositions assosiated with particular playrace.
+        # example: [participant_decompostionA, participant_decompositionB, ....., participant_decompositionN, ...]
+    elif isinstance(obj, int):
+        load_League_decomposition(obj,time, aggregate, name_decomp, name_normalization, event_name)
+        # Return all participant deccompositions assosiated with particular league
+        # example: [participant_decompostionA, participant_decompositionB, ....., participant_decompositionN, ...]
+    else:
+        print('Error: Unsupported type.')
+
 def load_Decomposition(participant, time, aggragate, name_decomp, name_normalization, event_name):
-    decomposition_load = joblib.load(name_decomp + '_' + name_normalization + '_time' + str(time) + '_agg' + str(aggragate) + '_Models/' + event_name + '_' +
+    decomposition_load = joblib.load(event_name + '_' + name_decomp + '_' + name_normalization + '_time' + str(time) + '_agg' + str(aggragate) + '_Models/' + event_name + '_' +
     str(participant.id) + '_' + str(participant.user[0].id) + '_' + participant.playrace + '_' +
     str(participant.game[0].id) + '_' + participant.league +'.joblib')
     return decomposition_load
