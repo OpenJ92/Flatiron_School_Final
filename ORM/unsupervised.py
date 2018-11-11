@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import sklearn
 import os
 import nltk
@@ -12,7 +13,7 @@ import matplotlib.pyplot as plt
 import plotly.offline as offline
 import plotly.graph_objs as go
 from plotly import tools
-from PCA_ETL import construct_df_UnitsStructures, construct_full_UnitsStructures_df, combine_df_UnitStructures
+from PCA_ETL import *
 offline.init_notebook_mode()
 
 ## Once PCA elements are complete, look to cluster along each of the above imported elements.
@@ -25,9 +26,37 @@ offline.init_notebook_mode()
 ##          for Aggregate true, use radial RSS as a means to measure goodness of fit.
 ##      4. Determine the composition of each cluster with respect to the elements clustered on.
 
+# Goal for SC2 on 11/11/18. Complete load decomposition function below and begin to test unsupervised ML algorithms listed in fi1 .1/
+
+def generate_directory_path(time, aggregate, name_decomp, name_normalization, event_name):
+    if isinstance(event_name, list):
+        return str(sorted(event_name)) + "_" + name_decomp + "_" + name_normalization + "_time" + str(time) + "_agg" + str(aggregate) + "_c_Models"
+    else:
+        return event_name + "_" + name_decomp + "_" + name_normalization + "_time" + str(time) + "_agg" + str(aggregate) + "_Models"
+
+def generate_file_path(obj, time, aggregate, name_decomp, name_normalization, event_name):
+    A = [file.split('_') for file in os.listdir(generate_directory_path(time, aggregate, name_decomp, name_normalization, event_name))]
+    B = pd.DataFrame(A, columns = ['event', 'participant_id', 'user_id', 'playrace', 'game_id', 'league'])
+    C = B[B[str(obj) + '_id'] == str(obj.id)]
+    D = generate_directory_path(time, aggregate, name_decomp, name_normalization, event_name)
+    E = reduce(lambda x,y: x + y, [C[col] if col == 'league' else C[col] + '_' for col in C.columns])
+    return E
+    # Test this function when you get back from Dunkin Donuts. Really hungry and tired.
+
+def generate_full_path(obj, time, aggregate, name_decomp, name_normalization, event_name):
+    A = generate_directory_path(time, aggregate, name_decomp, name_normalization, event_name)
+    B = generate_file_path(obj, time, aggregate, name_decomp, name_normalization, event_name)
+    C = B.apply(lambda x: A + '/' + x)
+    return C
+
+def load_decomposition(obj, time, aggregate, name_decomp, name_normalization, event_name):
+    return generate_full_path(obj, time, aggregate, name_decomp, name_normalization, event_name).apply(lambda x: joblib.load(x))
+
+def load_decomposition_FSV_(obj, time, aggregate, name_decomp, name_normalization, event_name):
+    return pd.DataFrame.from_records(np.array(load_decomposition(obj, time, aggregate, name_decomp, name_normalization, event_name).apply(lambda x: x.components_[0]))), generate_file_path(obj, time, aggregate, name_decomp, name_normalization, event_name)
 
 # Consider how one can filter on n parameters. Should it be done here or in the Database query?
-def load_decomposition(obj, time, aggregate, name_decomp, name_normalization, event_name):
+def _load_decomposition(obj, time, aggregate, name_decomp, name_normalization, event_name):
     if isinstance(obj, Participant):
         load_Participant_decomposition(obj, time, aggregate, name_decomp, name_normalization, event_name)
         # Return the participant decomposition of this type. In load_Participant_decomposition, check to see if that participant's id is in that directory's csv.

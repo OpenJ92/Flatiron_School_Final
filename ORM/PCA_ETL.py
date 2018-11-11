@@ -13,6 +13,7 @@ print('enter PCA')
 
 from routes import *
 import numpy as np
+import pandas as pd
 import sklearn
 from sklearn.decomposition import PCA, TruncatedSVD
 from sklearn.cluster import KMeans
@@ -204,8 +205,8 @@ def combined_pipeline(sql_func, func_decomp = PCA, func_normalization = MinMaxSc
                 B = pd.DataFrame(A, columns = ['event', 'participant_id', 'user_id', 'playrace', 'game_id', 'league'])
                 B.to_csv(str(sorted([i for i in event_combs])) + '_'+ name_decomp  + '_'+ name_normalization +  '_time' + str(True) + '_agg' + str(a_t) + '_c_Models/_directory_information.csv')
 
-combined_pipeline(db.session.query(Participant).filter(Participant.league == 20).all)
-pipeline(db.session.query(Participant).filter(Participant.league == 20).all)
+# combined_pipeline(db.session.query(Participant).filter(Participant.league == 20).all)
+# pipeline(db.session.query(Participant).filter(Participant.league == 20).all)
 
 ## Completed Pipeline queries:
 ##      1. db.session.query(Participant).filter(Participant.league == 20).all (in_Progress)(combined_pipline, pipline)

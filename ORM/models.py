@@ -22,6 +22,9 @@ class User(db.Model):
     def __repr__(self):
         return '<User (name = ' + self.name + ') >'
 
+    def __str__(self):
+        return 'user'
+
     @classmethod
     def all(cls):
         return db.session.query(cls).all()
@@ -63,6 +66,9 @@ class Participant(db.Model):
 
     def __repr__(self):
         return '<Participant (name = ' + self.name + ') >'
+
+    def __str__(self):
+        return 'participant'
 
     @classmethod
     def all(cls):
@@ -113,6 +119,9 @@ class Game(db.Model):
 
     def __repr__(self):
         return '<Game (map = ' + self.map + ', name = '+ self.name +') >'
+
+    def __str__(self):
+        return 'game'
 
     @classmethod
     def all(cls):
