@@ -1,5 +1,9 @@
 #### Flatiron_School_Final
 
+## NOTE: 
+Project continued at the following link
+https://github.com/OpenJ92/online-Starcraft
+
 ## Goal:
 A study of Starcraft 2 replay data in an attempt to identify strategy exterior to expert knowledge
 
